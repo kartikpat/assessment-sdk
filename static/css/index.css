@@ -1,17 +1,202 @@
-body, html {
+.hidden {
+  display: none; }
+
+.my-plugin-primary-text {
+  font-size: 16px;
+  color: #2b2b2b; }
+
+.my-plugin-checkbox-wrapper input {
+  display: none; }
+
+.my-plugin-checkbox-wrapper label {
+  display: inline-block;
+  cursor: pointer;
+  font-size: 16px;
+  color: #2b2b2b; }
+
+.my-plugin-checkbox-wrapper input + label {
+  padding: 5px 0 4px 35px;
+  background-image: url("/static/images/unchecked_checkbox.svg");
+  background-repeat: no-repeat;
+  background-size: 17px;
+  background-position: left 2px center; }
+
+.my-plugin-checkbox-wrapper input:checked + label {
+  background-image: url("/static/images/checkbox.png"); }
+
+.my-plugin-select-dropdown {
+  display: inline-block;
+  font-size: 14px;
+  color: #2b2b2b;
+  padding: 12px 38px 12px 20px;
+  border-radius: 3px;
+  background-color: #FFF;
+  width: 250px;
+  border: 1px solid #e4e4e4;
+  background-image: url(/static/images/down-arrow.png);
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 17px;
+  cursor: pointer;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -o-appearanance: none; }
+
+.my-plugin-textarea {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100px;
+  height: auto;
+  padding: 12px 22px;
+  box-sizing: border-box;
+  border: 1px solid #e8e8e8;
+  border-radius: 2px;
+  background-color: #fff;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-y: hidden;
+  outline: none; }
+  .my-plugin-textarea.my-plugin-small {
+    min-height: 50px;
+    width: 50%;
+    display: block;
+    padding-bottom: 0px; }
+
+* {
+  box-sizing: border-box; }
+
+html, body {
+  height: 100%;
   margin: 0;
+  padding: 0; }
+
+.my-plugin-wrapper {
   padding: 20px;
-  background-color: black; }
+  font-family: "Droid Sans", sans-serif; }
 
-.main-content {
-  height: 400px;
-  width: 400px; }
+.my-plugin-heading {
+  color: #2b2b2b;
+  font-size: 16px; }
 
-.center-block {
+.my-plugin-sub-heading {
+  color: #818181;
+  padding: 5px 0 15px 0;
+  font-size: 14px; }
+
+.my-plugin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -o-appearance: none;
+  border: 1px solid #8f8a8a;
+  color: #2b2b2b;
+  margin: 0;
+  background: #FFF;
+  font-size: 14px;
+  display: inline-block;
+  vertical-align: top;
+  cursor: pointer;
+  padding: 7px 14px;
+  border-radius: 4px;
+  outline: none; }
+
+.my-plugin-blue-button {
+  color: #155d9a;
+  box-shadow: none;
+  border: 0;
+  background: none; }
+
+.my-plugin-action-button-container {
+  position: relative;
+  line-height: 32px; }
+  .my-plugin-action-button-container .my-plugin-or-text {
+    display: inline-block;
+    width: 50px;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 14px;
+    color: #818181; }
+
+.my-plugin-container {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  -webkit-transform: translate(-50%, -50%);
-  -moz-transform: translate(-50%, -50%);
-  background: white; }
+  top: 0;
+  left: 0;
+  box-shadow: 3px 3px 12.74px 1.26px rgba(0, 0, 0, 0.16);
+  border: 1px solid #eee;
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 1;
+  height: 500px;
+  width: 100%;
+  max-width: 650px;
+  background-color: #FFF; }
+
+.my-plugin-usePrevQuestContainer {
+  padding: 0 15px; }
+  .my-plugin-usePrevQuestContainer .my-plugin-section-heading {
+    font-size: 16px;
+    color: #2b2b2b;
+    font-weight: bold;
+    height: 50px;
+    line-height: 50px; }
+  .my-plugin-usePrevQuestContainer .my-plugin-section-content {
+    height: calc(100% - 120px);
+    font-size: 16px;
+    color: #2b2b2b;
+    line-height: 1.2;
+    overflow-y: auto;
+    padding-right: 35px; }
+  .my-plugin-usePrevQuestContainer .my-plugin-section-footer {
+    border-top: 1px solid #eee;
+    height: 70px;
+    padding: 18px 0;
+    line-height: 34px; }
+  .my-plugin-usePrevQuestContainer .my-plugin-quest-added-text {
+    display: inline-block;
+    float: right; }
+  .my-plugin-usePrevQuestContainer .my-plugin-section-row {
+    padding-bottom: 5px; }
+
+.my-plugin-addQuestContainer .my-plugin-section-header {
+  background-color: #f3f3f3;
+  padding: 0 15px;
+  line-height: 70px; }
+
+.my-plugin-addQuestContainer .my-plugin-checkbox-wrapper {
+  display: inline-block;
+  float: right; }
+  .my-plugin-addQuestContainer .my-plugin-checkbox-wrapper input + label {
+    padding: 0 0 0 25px; }
+  .my-plugin-addQuestContainer .my-plugin-checkbox-wrapper label {
+    font-size: 14px; }
+
+.my-plugin-addQuestContainer .my-plugin-section-content {
+  font-size: 16px;
+  color: #2b2b2b;
+  line-height: 1.2;
+  padding: 15px; }
+  .my-plugin-addQuestContainer .my-plugin-section-content .my-plugin-text {
+    font-size: 14px;
+    color: #2b2b2b;
+    padding-bottom: 10px; }
+  .my-plugin-addQuestContainer .my-plugin-section-content .my-plugin-textarea {
+    margin-bottom: 15px; }
+
+.my-plugin-slide-wrapper {
+  padding-left: 37px; }
+  .my-plugin-slide-wrapper .my-plugin-slide-toggle-button {
+    color: #155d9a;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-block; }
+    .my-plugin-slide-wrapper .my-plugin-slide-toggle-button:hover {
+      text-decoration: underline; }
+  .my-plugin-slide-wrapper .my-plugin-options-wrapper {
+    padding-top: 5px;
+    display: none; }
+  .my-plugin-slide-wrapper .my-plugin-option-row {
+    display: list-item;
+    margin-left: 18px; }
+    .my-plugin-slide-wrapper .my-plugin-option-row:not(:last-child) {
+      padding-bottom: 5px; }

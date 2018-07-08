@@ -1,0 +1,79 @@
+@import "type";
+@import "colors";
+
+$namespace: 'my-plugin';
+
+.hidden {
+    display: none;
+}
+
+.#{$namespace} {
+    &-primary-text {
+        font-size: $primaryTextSize;
+        color: $primaryColor;
+    }
+    &-checkbox-wrapper {
+    	input {
+    		display: none;
+    	}
+    	label {
+    		display:inline-block;
+    		cursor:pointer;
+            font-size: $primaryTextSize;
+            color: $primaryColor;
+    	}
+    	input+label {
+    		padding:5px 0 4px 35px;
+    		background-image:url('/static/images/unchecked_checkbox.svg');
+    		background-repeat:no-repeat;
+    		background-size:17px;
+    		background-position:left 2px center;
+
+    	}
+    	input:checked+label {
+    		background-image:url('/static/images/checkbox.png');
+    	}
+    }
+    &-select-dropdown {
+        display: inline-block;
+        font-size: $secondaryTextSize;
+        color: $primaryColor;
+        padding: 12px 38px 12px 20px;
+        border-radius: 3px;
+        background-color: $white;
+        width: 250px;
+        border: 1px solid $borderColorLight;
+        background-image: url(/static/images/down-arrow.png);
+        background-repeat: no-repeat;
+        background-position: right 18px center;
+        background-size: 17px;
+        cursor: pointer;
+        outline: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        -o-appearanance: none;
+    }
+    &-textarea {
+        width: 100%;
+        max-width: 100%;
+        min-height: 100px;
+        height: auto;
+        padding: 12px 22px;
+        box-sizing: border-box;
+        border: 1px solid #e8e8e8;
+        border-radius: 2px;
+        background-color: #fff;
+        font-size: 14px;
+        line-height: 1.5;
+        overflow-y: hidden;
+        outline: none;
+        &.#{$namespace} {
+            &-small {
+                min-height: 50px;
+                width: 50%;
+                display: block;
+                padding-bottom: 0px; 
+            }
+        }
+    }
+}

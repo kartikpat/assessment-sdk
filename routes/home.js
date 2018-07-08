@@ -12,6 +12,7 @@ module.exports = function(settings){
 	var config = settings.config;
 	var env = settings.env;
 	var baseUrl =  config["baseUrl"];
+	var pluginName = config["pluginName"]
 	if(env=="local")
 		baseUrl= config["baseUrl_local"];
 	function isAuthenticated(req, res, next) {
@@ -30,7 +31,8 @@ module.exports = function(settings){
 			title: "",
 			styles:  assetsMapper["index"]["styles"][mode],
 			scripts: assetsMapper["index"]["scripts"][mode],
-			baseUrl: baseUrl
+			baseUrl: baseUrl,
+			pluginName: pluginName
 		});
 	});
 }

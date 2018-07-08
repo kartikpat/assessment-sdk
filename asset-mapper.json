@@ -5,15 +5,26 @@
             	"static/css/index.css"
 			],
 			"prod": [
-				"build/css/index.min.css"
+				"build/css/sdk-index.min.css"
 			]
 		},
 		"scripts": {
 			"debug": [
+				"static/js/vendor/jquery.min.js",
+				"static/js/utilities/request.js",
+				"static/js/utilities/pubsub.js",
+				"static/js/utilities/common.js",
+				"static/js/services/question/fetchQuestions.js",
+				"static/js/services/question/createQuestion.js",
+				"static/js/services/questionaire/createQuestionaire.js",
+				"static/js/services/questionaire/fetchQuestionaire.js",
+				"static/js/services/association/associateQuestionWithQuestionaire.js",
+				"static/js/global.js",
+				"static/js/model.js",
 				"static/js/index.js"
 			],
 			"prod" : [
-				"build/js/index.min.js"
+				"build/js/sdk-index.min.js"
 			]
 		}
 	}

@@ -5,7 +5,7 @@
 var gulp = require("gulp");
 var gutil = require("gulp-util");
 var sass = require("gulp-sass");
-var del = require("del");	
+var del = require("del");
 var notify = require("gulp-notify");
 var moment = require("moment");
 var uglifycss = require("gulp-uglifycss");
@@ -13,6 +13,7 @@ var concat = require('gulp-concat');
 var staticMapper = require("./asset-mapper.json");
 var uglify = require('gulp-uglify');
 var gulpDebug = require('gulp-debug');
+var babel = require('gulp-babel');
 
 // Use mocha for test driven development. But make this your last resort.
 // var mocha = require('./gulp-mocha')
@@ -42,9 +43,9 @@ gulp.task('build-css', function(){
 		.pipe(uglifycss())
 		.on('error', notify.onError("Error: <%= error.message %>"))
 		.pipe(gulp.dest('.'))
-	    .pipe(notify('Concatenated stylesheets for ' + staticMapper[key]["styles"]["prod"][0] + ' (' + moment().format('MMM Do h:mm:ss A') + ')'))	
+	    .pipe(notify('Concatenated stylesheets for ' + staticMapper[key]["styles"]["prod"][0] + ' (' + moment().format('MMM Do h:mm:ss A') + ')'))
 	}
-	
+
 });
 
 gulp.task('build-js', function(){
@@ -64,6 +65,14 @@ gulp.task('build-js', function(){
         .pipe(notify('Uglified JavaScript (' +staticMapper[key]["scripts"]["prod"][0]+ moment().format('MMM Do h:mm:ss A') + ')'))
 	}
 })
+
+gulp.task('script', function () {
+	for(var key in staticMapper){
+		gulp.src(getAssetsArray(staticMapper[key]["scripts"]["debug"]))
+        .pipe(babel())
+        .pipe(gulp.dest('.'));
+	}
+});
 
 
 gulp.task('build-sass',function(){
