@@ -1,4 +1,4 @@
-var questionTypeOptions = [
+export var questionTypeOptions = [
     {
         "value": 1,
         "text": "Multi choice"
@@ -21,6 +21,6 @@ var questionTypeOptions = [
     }
 ]
 
-var questionaireInvocation = {
+export var questionaireInvocation = {
     "screening": 1
 }

@@ -1,4 +1,4 @@
-function createQuestion(data, extraParameters){
+export function createQuestion(data, extraParameters){
 	return postRequest(sdkbaseUrl+"/v1/question", {"content-type": "application/json"}, JSON.stringify(data), function(res, status, xhr){
 		if(res.status && res.status =='success') {
 			res.extraParameters = {}

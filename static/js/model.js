@@ -1,6 +1,7 @@
-var settings = {}
+export var settings = {}
 
-function initialize(options) {
+export function initialize(options) {
+
     settings.totalQuestAddedCount = 0;
     settings.options = options
 
@@ -44,7 +45,7 @@ function initialize(options) {
 
 }
 
-function onClickUsePrevButton(fn) {
+export function onClickUsePrevButton(fn) {
     settings.usePrevButton.click(function(e) {
         e.stopPropagation()
         settings.usePrevQuestContainer.removeClass("hidden")
@@ -52,7 +53,7 @@ function onClickUsePrevButton(fn) {
     })
 }
 
-function onClickSaveQuestion(fn) {
+export function onClickSaveQuestion(fn) {
     settings.saveQuestionButton.click(function(e) {
         e.stopPropagation()
         var data = {}
@@ -69,21 +70,21 @@ function onClickSaveQuestion(fn) {
     })
 }
 
-function onClickAddUsePrevButton(fn) {
+export function onClickAddUsePrevButton(fn) {
     $("#" + transformId("addUsePrevButton")).click(function(event){
         event.stopPropagation()
         console.log("clicked")
     })
 }
 
-function createWrapperContent() {
+export function createWrapperContent() {
     var mainContainer = createElement("div", ["main-container"]);
     mainContainer.html(createMainContainer())
 
     return mainContainer[0].outerHTML
 }
 
-function createMainContainer() {
+export function createMainContainer() {
     var heading = createElement("div", ["heading"]).text(settings.options["title"]);
     var subHeading = createElement("div", ["sub-heading"]).text(settings.options["subTitle"]);
 
@@ -107,7 +108,7 @@ function createMainContainer() {
     return heading[0].outerHTML + subHeading[0].outerHTML + actionButtonsCont[0].outerHTML
 }
 
-function createAddedQuestContainer() {
+export function createAddedQuestContainer() {
     var heading = createElement("div", ["heading"]);
     var questionsContent = createElement("div", ["content"]);
     questionsContent.html(createQuestionsContent())
@@ -119,11 +120,11 @@ function createAddedQuestContainer() {
     return sectionHeader[0].outerHTML + sectionContent[0].outerHTML
 }
 
-function createQuestionsContent() {
+export function createQuestionsContent() {
 
 }
 
-function createAddQuestContainer() {
+export function createAddQuestContainer() {
     var sectionHeader = createElement("div", ["section-header"]);
     var selectDropdown = createSelectDropdown(questionTypeOptions, "questionType");
     var checkbox = createCheckbox("addQuestionHeader-isQuestMandatory",null ,null, null,"Mandatory");
@@ -133,7 +134,7 @@ function createAddQuestContainer() {
     return sectionHeader[0].outerHTML + sectionContent[0].outerHTML
 }
 
-function createUsePrevQuestContainer() {
+export function createUsePrevQuestContainer() {
     var sectionHeading = createElement("div", ["section-heading"]).text(settings.options["prevQuestContainerHeading"]);
     var sectionContent = createElement("div", ["section-content"]);
     var sectionFooter = createElement("div", ["section-footer"]);
@@ -145,7 +146,7 @@ function createUsePrevQuestContainer() {
     return sectionHeading[0].outerHTML + sectionContent[0].outerHTML + sectionFooter[0].outerHTML
 }
 
-function createUsePrevQuestSectionContent(data) {
+export function createUsePrevQuestSectionContent(data) {
     var sectionRowStr = ''
     data.forEach(function(aQuestion) {
         var sectionRow = createElement("div", ["section-row"]);
@@ -162,7 +163,7 @@ function createUsePrevQuestSectionContent(data) {
     return sectionRowStr;
 }
 
-function createAddQuestSectionContent(questionType) {
+export function createAddQuestSectionContent(questionType) {
     var questionText = createElement("div", ["text"]).text("Question Text");
     var questionTextarea = createElement("textarea", ["textarea"],"questionTextarea").attr({
         "placeholder": "What would you like to ask?"
@@ -180,7 +181,7 @@ function createAddQuestSectionContent(questionType) {
     return questionText[0].outerHTML + questionTextarea[0].outerHTML + saveButton[0].outerHTML + cancelButton[0].outerHTML;
 }
 
-function onClickPrevQuestCheckbox() {
+export function onClickPrevQuestCheckbox() {
     settings.usePrevQuestContainer.on('click', '.' + transformClass(["checkbox-input"]), function(event){
         event.stopPropagation()
         if($(this).is(":checked")) {
@@ -204,14 +205,14 @@ function onClickPrevQuestCheckbox() {
     })
 }
 
-function updateTotalQuestionsAddedText() {
+export function updateTotalQuestionsAddedText() {
     settings.totalQuestAdded.text("Questions added: "+settings.totalQuestAddedCount+"/10")
 }
 
-function openAddQuestionModal() {
+export function openAddQuestionModal() {
     debugger
 }
 
-function populatePreviousUsedQuestions(data) {
+export function populatePreviousUsedQuestions(data) {
     settings.usePrevQuestContainer.find("." + transformClass(["section-content"])).html(createUsePrevQuestSectionContent(data))
 }

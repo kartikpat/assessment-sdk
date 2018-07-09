@@ -1,8 +1,15 @@
 
-import * as common from 'utilities/common'
+import * as common from './utilities/common';
+// import * as global from './global';
+import * as model from './model';
+import {associateQuestionWithQuestionaire} from './services/association/associateQuestionWithQuestionaire';
+import {createQuestion} from './services/question/createQuestion';
+import {fetchQuestions} from './services/question/fetchQuestions';
+import {createQuestionaire} from './services/questionaire/createQuestionaire';
+import {fetchQuestionaire} from './services/questionaire/fetchQuestionaire';
+
 // Create an immediately invoked functional expression to wrap our code
 (function() {
-
 
     // Define our constructor
     this.Test = function() {

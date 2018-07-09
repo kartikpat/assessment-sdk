@@ -14,6 +14,9 @@ var staticMapper = require("./asset-mapper.json");
 var uglify = require('gulp-uglify');
 var gulpDebug = require('gulp-debug');
 var babel = require('gulp-babel');
+var rollup = require('rollup-stream');
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
 
 // Use mocha for test driven development. But make this your last resort.
 // var mocha = require('./gulp-mocha')
@@ -67,11 +70,12 @@ gulp.task('build-js', function(){
 })
 
 gulp.task('script', function () {
-	for(var key in staticMapper){
-		gulp.src(getAssetsArray(staticMapper[key]["scripts"]["debug"]))
-        .pipe(babel())
-        .pipe(gulp.dest('.'));
-	}
+	return rollup({input: './static/js/index.js',
+					format: 'iife'})
+    		.pipe(source('./static/js/index.js'))
+    		.pipe(buffer())
+    		.pipe(babel())
+    		.pipe(gulp.dest('./test'));
 });
 
 
