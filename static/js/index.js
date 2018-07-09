@@ -1,12 +1,12 @@
-
-import * as common from './utilities/common';
-// import * as global from './global';
-import * as model from './model';
-import {associateQuestionWithQuestionaire} from './services/association/associateQuestionWithQuestionaire';
-import {createQuestion} from './services/question/createQuestion';
-import {fetchQuestions} from './services/question/fetchQuestions';
-import {createQuestionaire} from './services/questionaire/createQuestionaire';
-import {fetchQuestionaire} from './services/questionaire/fetchQuestionaire';
+//
+// import * as common from './utilities/common';
+// // import * as global from './global';
+// import * as model from './model';
+// import {associateQuestionWithQuestionaire} from './services/association/associateQuestionWithQuestionaire';
+// import {createQuestion} from './services/question/createQuestion';
+// import {fetchQuestions} from './services/question/fetchQuestions';
+// import {createQuestionaire} from './services/questionaire/createQuestionaire';
+// import {fetchQuestionaire} from './services/questionaire/fetchQuestionaire';
 
 // Create an immediately invoked functional expression to wrap our code
 (function() {
@@ -31,7 +31,7 @@ import {fetchQuestionaire} from './services/questionaire/fetchQuestionaire';
 
         // Create options by extending defaults with the passed in arugments
         if (arguments[0] && typeof arguments[0] === "object") {
-            this.options = common.extendDefaults(defaults, arguments[0]);
+            this.options = extendDefaults(defaults, arguments[0]);
         }
     }
 
@@ -119,7 +119,7 @@ import {fetchQuestionaire} from './services/questionaire/fetchQuestionaire';
         var data = res.data;
 
         options.responseData = data;
-        debugger
+
         initialize(options)
 
         onClickUsePrevButton(function(){

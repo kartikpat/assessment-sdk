@@ -98,7 +98,7 @@ gulp.task('watch-test', function(){
 	gulp.watch('test/**.js', ['run-test']);
 })
 
-gulp.task('watch', ['clean','build-sass', 'build-css', 'build-js'], function(){
+gulp.task('watch', ['clean','build-sass', 'build-css'], function(){
 	gulp.watch('static/scss/**/*.scss', ['build-sass']);
 });
 

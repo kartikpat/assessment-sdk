@@ -13,7 +13,15 @@
 				"static/js/vendor/jquery.min.js",
 				"static/js/utilities/request.js",
 				"static/js/utilities/pubsub.js",
-				"test/static/js/index.js",
+				"static/js/utilities/common.js",
+				"static/js/services/question/fetchQuestions.js",
+				"static/js/services/question/createQuestion.js",
+				"static/js/services/questionaire/createQuestionaire.js",
+				"static/js/services/questionaire/fetchQuestionaire.js",
+				"static/js/services/association/associateQuestionWithQuestionaire.js",
+				"static/js/global.js",
+				"static/js/model.js",
+				"static/js/index.js",
 				"static/js/main.js"
 			],
 			"prod" : [

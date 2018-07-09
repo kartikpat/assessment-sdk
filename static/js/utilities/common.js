@@ -1,9 +1,9 @@
-export var pluginName = "my-plugin-"
-export var sdkbaseUrl_local = "http://127.0.0.1:5000"
-export var sdkbaseUrl = "http://127.0.0.1:5000"
+ var pluginName = "my-plugin-"
+ var sdkbaseUrl_local = "http://127.0.0.1:5000"
+ var sdkbaseUrl = "http://127.0.0.1:5000"
 
 // Utility method to extend defaults with user options
-export function extendDefaults(source, properties) {
+ function extendDefaults(source, properties) {
     var property;
     for (property in properties) {
         if (properties.hasOwnProperty(property)) {
@@ -13,7 +13,7 @@ export function extendDefaults(source, properties) {
     return source;
 }
 
-export function transformClass(classNameArr) {
+ function transformClass(classNameArr) {
     var classNameStr = ''
     var transformedArr = []
     classNameArr.forEach(function(className) {
@@ -24,11 +24,11 @@ export function transformClass(classNameArr) {
     return classNameStr
 }
 
-export function transformId(id) {
+ function transformId(id) {
     return pluginName + id
 }
 
-export function createElement(elem, classNameArr, id) {
+ function createElement(elem, classNameArr, id) {
     var domElem = $("<"+elem+"></"+elem+">")
     if(classNameArr && classNameArr.length){
         domElem.addClass(transformClass(classNameArr))
@@ -39,7 +39,7 @@ export function createElement(elem, classNameArr, id) {
     return domElem
 }
 
-export function createCheckbox(id,name, value, dataLabel, text ) {
+ function createCheckbox(id,name, value, dataLabel, text ) {
     var checkboxWrapper = createElement("div", ["checkbox-wrapper"]);
 
     var input = createElement("input", ["checkbox-input"]).attr({
@@ -57,7 +57,7 @@ export function createCheckbox(id,name, value, dataLabel, text ) {
     return checkboxWrapper[0].outerHTML
 }
 
-export function createSlideDropDown(options) {
+ function createSlideDropDown(options) {
     var slideWrapper = createElement("div", ["slide-wrapper"]);
     var toggleButton = createElement("div", ["slide-toggle-button"]).text("view options");
     var optionsWrapper = createElement("div", ["options-wrapper"])
@@ -72,7 +72,7 @@ export function createSlideDropDown(options) {
     return slideWrapper[0].outerHTML
 }
 
-export function createSelectDropdown(options, id) {
+ function createSelectDropdown(options, id) {
     var select = createElement("select", ["select-dropdown"]);
     var optionRowStr = ''
     options.forEach(function(anOption) {
@@ -85,19 +85,19 @@ export function createSelectDropdown(options, id) {
     return select[0].outerHTML
 }
 
-export function toggleSlideOptions() {
+ function toggleSlideOptions() {
     settings.usePrevQuestContainer.on('click', '.' + transformClass(["slide-toggle-button"]), function(event){
         event.stopPropagation()
         $(this).next().slideToggle();
     })
 }
 
-export function closeContainer() {
+ function closeContainer() {
     $("." + transformClass(["container"])).addClass("hidden")
 }
 
 
-export function createTextarea(n) {
+ function createTextarea(n) {
     if(!n)
         return
 
