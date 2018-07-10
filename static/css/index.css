@@ -101,7 +101,7 @@ html, body {
   border-radius: 4px;
   outline: none; }
 
-.my-plugin-blue-button {
+.my-plugin-borderLess-button {
   color: #155d9a;
   box-shadow: none;
   border: 0;

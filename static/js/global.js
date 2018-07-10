@@ -1,4 +1,8 @@
- var questionTypeOptions = [
+export var pluginName = "my-plugin-"
+export var baseUrl_local = "http://127.0.0.1:5000"
+export var baseUrl = "http://127.0.0.1:5000"
+
+export var questionTypeOptions = [
     {
         "value": 1,
         "text": "Multi choice"
@@ -21,6 +25,6 @@
     }
 ]
 
- var questionaireInvocation = {
+export var questionaireInvocation = {
     "screening": 1
 }

@@ -1,11 +1,11 @@
 {
-	"index": {
+	"withDependencies": {
 		"styles": {
 			"debug" : [
             	"static/css/index.css"
 			],
 			"prod": [
-				"build/css/sdk-index.min.css"
+				"build/css/assessment.min.css"
 			]
 		},
 		"scripts": {
@@ -13,19 +13,30 @@
 				"static/js/vendor/jquery.min.js",
 				"static/js/utilities/request.js",
 				"static/js/utilities/pubsub.js",
-				"static/js/utilities/common.js",
-				"static/js/services/question/fetchQuestions.js",
-				"static/js/services/question/createQuestion.js",
-				"static/js/services/questionaire/createQuestionaire.js",
-				"static/js/services/questionaire/fetchQuestionaire.js",
-				"static/js/services/association/associateQuestionWithQuestionaire.js",
-				"static/js/global.js",
-				"static/js/model.js",
-				"static/js/index.js",
+				"bundle/bundle.js",
 				"static/js/main.js"
 			],
 			"prod" : [
-				"build/js/sdk-index.min.js"
+				"build/js/assessment-withDependencies.min.js"
+			]
+		}
+	},
+	"withoutDependencies": {
+		"styles": {
+			"debug" : [
+            	"static/css/index.css"
+			],
+			"prod": [
+				"build/css/assessment.min.css"
+			]
+		},
+		"scripts": {
+			"debug": [
+				"bundle/bundle.js",
+				"static/js/main.js"
+			],
+			"prod" : [
+				"build/js/assessment-withoutDependencies.min.js"
 			]
 		}
 	}
