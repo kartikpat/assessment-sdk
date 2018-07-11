@@ -4,7 +4,7 @@
 $namespace: 'my-plugin';
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .#{$namespace} {
@@ -71,8 +71,8 @@ $namespace: 'my-plugin';
             &-small {
                 min-height: 50px;
                 width: 50%;
-                display: block;
-                padding-bottom: 0px; 
+                display: inline-block;
+                padding-bottom: 0px;
             }
         }
     }

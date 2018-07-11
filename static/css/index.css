@@ -1,5 +1,5 @@
 .hidden {
-  display: none; }
+  display: none !important; }
 
 .my-plugin-primary-text {
   font-size: 16px;
@@ -60,7 +60,7 @@
   .my-plugin-textarea.my-plugin-small {
     min-height: 50px;
     width: 50%;
-    display: block;
+    display: inline-block;
     padding-bottom: 0px; }
 
 * {
@@ -132,6 +132,11 @@ html, body {
   max-width: 650px;
   background-color: #FFF; }
 
+.my-plugin-cross-button {
+  cursor: pointer; }
+  .my-plugin-cross-button:after {
+    content: '..'; }
+
 .my-plugin-usePrevQuestContainer {
   padding: 0 15px; }
   .my-plugin-usePrevQuestContainer .my-plugin-section-heading {
@@ -158,30 +163,41 @@ html, body {
   .my-plugin-usePrevQuestContainer .my-plugin-section-row {
     padding-bottom: 5px; }
 
-.my-plugin-addQuestContainer .my-plugin-section-header {
-  background-color: #f3f3f3;
-  padding: 0 15px;
-  line-height: 70px; }
-
-.my-plugin-addQuestContainer .my-plugin-checkbox-wrapper {
-  display: inline-block;
-  float: right; }
-  .my-plugin-addQuestContainer .my-plugin-checkbox-wrapper input + label {
-    padding: 0 0 0 25px; }
-  .my-plugin-addQuestContainer .my-plugin-checkbox-wrapper label {
-    font-size: 14px; }
-
-.my-plugin-addQuestContainer .my-plugin-section-content {
-  font-size: 16px;
-  color: #2b2b2b;
-  line-height: 1.2;
-  padding: 15px; }
-  .my-plugin-addQuestContainer .my-plugin-section-content .my-plugin-text {
-    font-size: 14px;
+.my-plugin-addQuestContainer {
+  height: auto; }
+  .my-plugin-addQuestContainer .my-plugin-section-header {
+    background-color: #f3f3f3;
+    padding: 0 15px;
+    line-height: 70px; }
+  .my-plugin-addQuestContainer .my-plugin-checkbox-wrapper {
+    display: inline-block;
+    float: right; }
+    .my-plugin-addQuestContainer .my-plugin-checkbox-wrapper input + label {
+      padding: 0 0 0 25px; }
+    .my-plugin-addQuestContainer .my-plugin-checkbox-wrapper label {
+      font-size: 14px; }
+  .my-plugin-addQuestContainer .my-plugin-section-content {
+    font-size: 16px;
     color: #2b2b2b;
-    padding-bottom: 10px; }
-  .my-plugin-addQuestContainer .my-plugin-section-content .my-plugin-textarea {
-    margin-bottom: 15px; }
+    line-height: 1.2;
+    padding: 15px; }
+    .my-plugin-addQuestContainer .my-plugin-section-content .my-plugin-text {
+      font-size: 14px;
+      color: #2b2b2b;
+      padding-bottom: 10px; }
+    .my-plugin-addQuestContainer .my-plugin-section-content .my-plugin-textarea {
+      margin-bottom: 15px; }
+  .my-plugin-addQuestContainer .my-plugin-options-textarea-wrapper .my-plugin-cross-button {
+    position: relative;
+    top: -42px;
+    right: -25px; }
+    .my-plugin-addQuestContainer .my-plugin-options-textarea-wrapper .my-plugin-cross-button:after {
+      content: '..'; }
+  .my-plugin-addQuestContainer .my-plugin-add-quest-option {
+    padding-top: 0;
+    padding-left: 0; }
+  .my-plugin-addQuestContainer .my-plugin-section-footer {
+    padding: 0 15px 15px 15px; }
 
 .my-plugin-slide-wrapper {
   padding-left: 37px; }

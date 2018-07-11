@@ -1,6 +1,41 @@
 var assessmentSdk = (function () {
     'use strict';
 
+    var pluginName = "my-plugin-";
+    var settings = {};
+    var questionTypeOptions = [{
+        "value": 1,
+        "text": "Multi choice",
+        "data-label": "multi"
+    }, {
+        "value": 2,
+        "text": "Single choice",
+        "data-label": "single"
+    }, {
+        "value": 3,
+        "text": "Yes/No Question"
+    }, {
+        "value": 4,
+        "text": "Short Answer"
+    }, {
+        "value": 5,
+        "text": "Long Answer"
+    }];
+
+    var questionaireInvocation = {
+        "screening": 1
+    };
+
+    function extendDefaults(source, properties) {
+        var property;
+        for (property in properties) {
+            if (properties.hasOwnProperty(property)) {
+                source[property] = properties[property];
+            }
+        }
+        return source;
+    }
+
     function transformClass(classNameArr) {
         var classNameStr = '';
         var transformedArr = [];
@@ -37,11 +72,29 @@ var assessmentSdk = (function () {
         return checkboxWrapper[0].outerHTML;
     }
 
+    function createSlideDropDown(options) {
+        var slideWrapper = createElement("div", ["slide-wrapper"]);
+        var toggleButton = createElement("div", ["slide-toggle-button"]).text("view options");
+        var optionsWrapper = createElement("div", ["options-wrapper"]);
+        var optionRowStr = '';
+
+        options.forEach(function (anOption) {
+            var optionRow = createElement("div", ["option-row"]).text(anOption);
+            optionRowStr += optionRow[0].outerHTML;
+        });
+        optionsWrapper.html(optionRowStr);
+        slideWrapper.html(toggleButton[0].outerHTML + optionsWrapper[0].outerHTML);
+        return slideWrapper[0].outerHTML;
+    }
+
     function createSelectDropdown(options, id) {
-        var select = createElement("select", ["select-dropdown"]);
+        var select = createElement("select", ["select-dropdown"], id);
         var optionRowStr = '';
         options.forEach(function (anOption) {
-            var optionRow = createElement("option", ["option-row"], id).attr({ "value": anOption["value"] }).text(anOption["text"]);
+            var optionRow = createElement("option", ["option-row"]).attr({
+                "value": anOption["value"],
+                "data-label": anOption["data-label"]
+            }).text(anOption["text"]);
             optionRowStr += optionRow[0].outerHTML;
         });
         select.html(optionRowStr);
@@ -59,30 +112,35 @@ var assessmentSdk = (function () {
         $("." + transformClass(["container"])).addClass("hidden");
     }
 
-    function createTextarea(n) {
+    function createTextarea(n, offset) {
         if (!n) return;
 
+        var j = offset || 0;
         var i;
         var textareaStr = '';
         for (i = 0; i < n; i++) {
+            var optionsTextareaWrapper = createElement("div", ["options-textarea-wrapper"]);
             var textarea = createElement("textarea", ["textarea", "small", "optionsTextarea"]).attr({
-                "placeholder": "Option " + (i + 1) + ""
-            });        textareaStr += textarea[0].outerHTML;
+                "placeholder": "Option " + (j + 1)
+            });
+            j++;
+            var cancelButton = createElement("span", ["cross-button", "deleteOptionButton"]).addClass("hidden");
+            optionsTextareaWrapper.html(textarea[0].outerHTML + cancelButton[0].outerHTML);
+
+            textareaStr += optionsTextareaWrapper[0].outerHTML;
         }
         return textareaStr;
     }
 
-    var settings = {};
-
-    function initialize(options) {
-
-        settings.totalQuestAddedCount = 0;
-        settings.options = options;
+    function initialize(data) {
+        settings.totalQuestAddedCount = data.questionaire[0]["sections"][0]["questions"].length;
+        settings.options = data.options;
+        settings.prevQuestions = data.prevQuestions;
 
         var wrapper = createElement("div", ["wrapper"]);
         wrapper.html(createWrapperContent());
 
-        $("#" + settings.options.wrapperName).html(wrapper[0].outerHTML);
+        $("#container").html(wrapper[0].outerHTML);
 
         settings.addQuestContainer = $("#" + transformId("addQuestContainer"));
         settings.usePrevQuestContainer = $("#" + transformId("usePrevQuestContainer"));
@@ -92,11 +150,15 @@ var assessmentSdk = (function () {
         settings.questionTextarea = $("#" + transformId("questionTextarea"));
         settings.questionType = $("#" + transformId("questionType"));
         settings.usePrevButtonModal = $("#" + transformId("usePrevButtonModal"));
+        settings.questMandatory = $("#" + transformId("addQuestionHeader-isQuestMandatory"));
+        settings.addQuestOptionButton = $("#" + transformId("addQuestOptionButton"));
 
         settings.optionsTextarea = $("." + transformClass(["optionsTextarea"]));
         settings.totalQuestAdded = $("." + transformClass(["totalQuestAdded"]));
 
-        settings.addQuesButton.click(function (e) {
+        updateTotalQuestionsAddedText();
+
+        settings.addQuestButton.click(function (e) {
             e.stopPropagation();
             settings.addQuestContainer.removeClass("hidden");
         });
@@ -109,7 +171,7 @@ var assessmentSdk = (function () {
             event.stopPropagation();
         });
 
-        $("." + transformClass(["cancel-button"])).click(function (event) {
+        $("." + transformClass(["cancel-container-button"])).click(function (event) {
             event.stopPropagation();
             closeContainer();
         });
@@ -119,6 +181,40 @@ var assessmentSdk = (function () {
         toggleSlideOptions(settings.usePrevQuestContainer);
 
         onClickUsePrevButton();
+
+        onClickAddQuestOption();
+
+        onChangeQuestType();
+
+        onClickDeleteQuestOption();
+    }
+
+    function onClickDeleteQuestOption() {
+        settings.addQuestContainer.on('click', "." + transformClass(["deleteOptionButton"]), function (e) {
+            $(this).parent().remove();
+            var optionsLength = settings.addQuestContainer.find(".my-plugin-optionsTextarea").length;
+            if (optionsLength <= 2) {
+                settings.addQuestContainer.find('.' + transformClass(["deleteOptionButton"])).addClass("hidden");
+            }
+        });
+    }
+
+    function onChangeQuestType() {
+        settings.questionType.change(function (e) {
+            var type = $(this).find('option:selected').attr("data-label");
+            settings.addQuestContainer.find("." + transformClass(["section-content"])).html(createAddQuestSectionContent(type));
+        });
+    }
+
+    function onClickAddQuestOption() {
+        settings.addQuestOptionButton.click(function (e) {
+            e.stopPropagation();
+            var optionsLength = settings.addQuestContainer.find(".my-plugin-optionsTextarea").length;
+            settings.addQuestContainer.find("." + transformClass(["options-wrapper"])).append(createTextarea(1, optionsLength));
+            if (optionsLength >= 2) {
+                settings.addQuestContainer.find('.' + transformClass(["deleteOptionButton"])).removeClass("hidden");
+            }
+        });
     }
 
     function onClickUsePrevButton() {
@@ -128,7 +224,7 @@ var assessmentSdk = (function () {
         });
     }
 
-    function onClickSaveQuestion(fn) {
+    function onClickAddQuestion(fn) {
         settings.addQuestButtonModal.click(function (e) {
             e.stopPropagation();
             var data = {};
@@ -138,8 +234,9 @@ var assessmentSdk = (function () {
             $.each(settings.optionsTextarea, function (index, anOption) {
                 ansOptions.push($(anOption).val());
             });
-            data["ansOptions"] = ansOptions;
+            data["answerOptions"] = ansOptions;
             data["author"] = settings.options.author;
+            data["mandatory"] = settings.questMandatory.is(":checked");
 
             fn(data);
         });
@@ -153,6 +250,7 @@ var assessmentSdk = (function () {
     }
 
     function createWrapperContent() {
+
         var mainContainer = createElement("div", ["main-container"]);
         mainContainer.html(createMainContainer());
 
@@ -160,6 +258,7 @@ var assessmentSdk = (function () {
     }
 
     function createMainContainer() {
+
         var heading = createElement("div", ["heading"]).text(settings.options["title"]);
         var subHeading = createElement("div", ["sub-heading"]).text(settings.options["subTitle"]);
 
@@ -167,58 +266,100 @@ var assessmentSdk = (function () {
         // addedQuestContainer.html(createAddedQuestContainer())
 
         var actionButtonsCont = createElement("div", ["action-button-container"]);
-        var text = createElement("span", ["or-text"]).text("or");
-        var usePrevButton = createElement("button", ["button"], "usePrevButton").text(settings.options["usePrevButtonText"]).addClass("hidden");
-        var addQuesButton = createElement("button", ["button"], "addQuesButton").text(settings.options["addQuesButtonText"]);
+        var addQuestButton = createElement("button", ["button"], "addQuestButton").text("Add Question");
 
         var addQuestContainer = createElement("div", ["container", "addQuestContainer"], "addQuestContainer").addClass("hidden");
         addQuestContainer.html(createAddQuestContainer());
 
-        var usePrevQuestContainer = createElement("div", ["container", "usePrevQuestContainer"], "usePrevQuestContainer").addClass("hidden");
-        usePrevQuestContainer.html(createUsePrevQuestContainer());
+        var actionButtonsContStr = addQuestButton[0].outerHTML + addQuestContainer[0].outerHTML;
 
-        actionButtonsCont.html(addQuesButton[0].outerHTML + text[0].outerHTML + usePrevButton[0].outerHTML + addQuestContainer[0].outerHTML + usePrevQuestContainer[0].outerHTML);
+        if (settings.prevQuestions.length) {
+
+            var text = createElement("span", ["or-text"]).text("or");
+            var usePrevButton = createElement("button", ["button"], "usePrevButton").text("Use previously used questions");
+            var usePrevQuestContainer = createElement("div", ["container", "usePrevQuestContainer"], "usePrevQuestContainer").addClass("hidden");
+            usePrevQuestContainer.html(createUsePrevQuestContainer(settings.prevQuestions));
+
+            actionButtonsContStr = addQuestButton[0].outerHTML + text[0].outerHTML + usePrevButton[0].outerHTML + addQuestContainer[0].outerHTML + usePrevQuestContainer[0].outerHTML;
+        }
+
+        actionButtonsCont.html(actionButtonsContStr);
 
         return heading[0].outerHTML + subHeading[0].outerHTML + actionButtonsCont[0].outerHTML;
     }
 
+    // function createAddedQuestContainer() {
+    //     var heading = createElement("div", ["heading"]);
+    //     var questionsContent = createElement("div", ["content"]);
+    //     questionsContent.html(createQuestionsContent())
+    //     var selectDropdown = createSelectDropdown(questionTypeOptions, "questionType");
+    //     var checkbox = createCheckbox(transformId("addQuestionHeader-isQuestMandatory"), null, null, null, "Mandatory");
+    //     sectionHeader.html(selectDropdown + checkbox);
+    //     var sectionContent = createElement("div", ["section-content"]);
+    //     sectionContent.html(createAddQuestSectionContent(1))
+    //     return sectionHeader[0].outerHTML + sectionContent[0].outerHTML
+    // }
+
+    // function createQuestionsContent() {}
+
     function createAddQuestContainer() {
         var sectionHeader = createElement("div", ["section-header"]);
         var selectDropdown = createSelectDropdown(questionTypeOptions, "questionType");
-        var checkbox = createCheckbox("addQuestionHeader-isQuestMandatory", null, null, null, "Mandatory");
+        var checkbox = createCheckbox(transformId("addQuestionHeader-isQuestMandatory"), null, null, null, "Mandatory");
         sectionHeader.html(selectDropdown + checkbox);
         var sectionContent = createElement("div", ["section-content"]);
         sectionContent.html(createAddQuestSectionContent("multi"));
-        return sectionHeader[0].outerHTML + sectionContent[0].outerHTML;
+
+        var sectionFooter = createElement("div", ["section-footer"]);
+        var addButton = createElement("button", ["button"], "addQuestButtonModal").text("Add");
+        var cancelButton = createElement("button", ["button", "borderLess-button", "cancel-container-button"]).text("Cancel");
+        sectionFooter.html(addButton[0].outerHTML + cancelButton[0].outerHTML);
+
+        return sectionHeader[0].outerHTML + sectionContent[0].outerHTML + sectionFooter[0].outerHTML;
     }
 
-    function createUsePrevQuestContainer() {
-        var sectionHeading = createElement("div", ["section-heading"]).text(settings.options["prevQuestContainerHeading"]);
+    function createUsePrevQuestContainer(data) {
+        var sectionHeading = createElement("div", ["section-heading"]).text("Use previously added question");
         var sectionContent = createElement("div", ["section-content"]);
+        sectionContent.html(createUsePrevQuestSectionContent(data));
         var sectionFooter = createElement("div", ["section-footer"]);
         var addButton = createElement("button", ["button"], "usePrevButtonModal").text("Add selected questions");
-        var cancelButton = createElement("button", ["button", "cancel-button"]).text("Cancel");
+        var cancelButton = createElement("button", ["button", "borderLess-button",, "cancel-container-button"]).text("Cancel");
         var totalQuestionsAdded = createElement("div", ["quest-added-text", "totalQuestAdded"]).text("Questions added: 0/10");
         sectionFooter.html(addButton[0].outerHTML + cancelButton[0].outerHTML + totalQuestionsAdded[0].outerHTML);
 
         return sectionHeading[0].outerHTML + sectionContent[0].outerHTML + sectionFooter[0].outerHTML;
     }
 
+    function createUsePrevQuestSectionContent(data) {
+        var sectionRowStr = '';
+        data.forEach(function (aQuestion) {
+            var sectionRow = createElement("div", ["section-row"]);
+            var checkbox = createCheckbox("addQuestSectionRow" + aQuestion["id"], null, aQuestion["id"], null, aQuestion["question"]);
+            if (aQuestion["answerOptions"].length) {
+                var slideDropdown = createSlideDropDown(aQuestion["answerOptions"]);
+            }
+
+            sectionRow.html(checkbox + slideDropdown);
+            sectionRowStr += sectionRow[0].outerHTML;
+        });
+
+        return sectionRowStr;
+    }
+
     function createAddQuestSectionContent(questionType) {
         var questionText = createElement("div", ["text"]).text("Question Text");
         var questionTextarea = createElement("textarea", ["textarea"], "questionTextarea").attr({ "placeholder": "What would you like to ask?" });
 
-        var addQuestButton = createElement("button", ["button"], "addQuestButtonModal").text("Save");
-        var cancelButton = createElement("button", ["button", "borderLess-button", "cancel-button"]).text("Cancel");
-
         if (["multi", "single"].indexOf(questionType) != -1) {
             var optionsWrapper = createElement("div", ["options-wrapper"]);
-            var optionTextArea = createTextarea(2);
-            var addOptionButton = createElement("button", ["button", "borderLess-button", "add-option"]).text("Add");
-            optionsWrapper.html(optionTextArea + addOptionButton[0].outerHTML);
-            return questionText[0].outerHTML + questionTextarea[0].outerHTML + optionsWrapper[0].outerHTML + addQuestButton[0].outerHTML + cancelButton[0].outerHTML;
+            var optionTextArea = createTextarea(2, 0);
+            var addOptionButton = createElement("button", ["button", "borderLess-button", "add-quest-option"], "addQuestOptionButton").text("Add");
+            optionsWrapper.html(optionTextArea);
+            return questionText[0].outerHTML + questionTextarea[0].outerHTML + optionsWrapper[0].outerHTML + addOptionButton[0].outerHTML;
         }
-        return questionText[0].outerHTML + questionTextarea[0].outerHTML + addQuestButton[0].outerHTML + cancelButton[0].outerHTML;
+
+        return questionText[0].outerHTML + questionTextarea[0].outerHTML;
     }
 
     function onClickPrevQuestCheckboxModal() {
@@ -248,8 +389,12 @@ var assessmentSdk = (function () {
         settings.totalQuestAdded.text("Questions added: " + settings.totalQuestAddedCount + "/10");
     }
 
+    // export function populatePreviousUsedQuestions(data) {
+    //     settings.usePrevQuestContainer.find("." + transformClass(["section-content"])).html(createUsePrevQuestSectionContent(data))
+    // }
+
     function associateQuestionWithQuestionaire(questionaireId, sectionId, data, extraParameters) {
-    	return postRequest(sdkbaseUrl + "/v1/questionaire/" + questionaireId + "/section/" + sectionId + "/question", { "content-type": "application/json" }, JSON.stringify(data), function (res, status, xhr) {
+    	return postRequest(baseUrl + "/v1/questionaire/" + questionaireId + "/section/" + sectionId + "/question", { "content-type": "application/json" }, JSON.stringify(data), function (res, status, xhr) {
     		if (res.status && res.status == 'success') {
     			// res.extraParameters = {}
     			// res.extraParameters["questionaireId"] = extraParameters.questionaireId
@@ -261,7 +406,7 @@ var assessmentSdk = (function () {
     }
 
     function createQuestion(data, extraParameters) {
-    	return postRequest(sdkbaseUrl + "/v1/question", { "content-type": "application/json" }, JSON.stringify(data), function (res, status, xhr) {
+    	return postRequest(baseUrl + "/v1/question", { "content-type": "application/json" }, JSON.stringify(data), function (res, status, xhr) {
     		if (res.status && res.status == 'success') {
     			res.extraParameters = {};
     			res.extraParameters["questionaireId"] = extraParameters.questionaireId;
@@ -274,7 +419,7 @@ var assessmentSdk = (function () {
     }
 
     function fetchQuestions(parameters) {
-    	return getRequest(sdkbaseUrl + "/v1/question", parameters, function (res) {
+    	return getRequest(baseUrl + "/v1/question", parameters, function (res) {
     		if (res.status && res.status == 'success') {
     			return pubsub.publish("fetchedQuestions", res);
     		}
@@ -284,7 +429,7 @@ var assessmentSdk = (function () {
     }
 
     function createQuestionaire(data, extraParameters) {
-    	return postRequest(sdkbaseUrl + "/v1/questionaire", { "content-type": "application/json" }, JSON.stringify(data), function (res, status, xhr) {
+    	return postRequest(baseUrl + "/v1/questionaire", { "content-type": "application/json" }, JSON.stringify(data), function (res, status, xhr) {
     		if (res.status && res.status == 'success') {
     			res.extraParameters = {};
     			res.extraParameters["questionData"] = extraParameters.questionData;
@@ -296,7 +441,7 @@ var assessmentSdk = (function () {
     }
 
     function fetchQuestionaire(parameters) {
-    	return getRequest(sdkbaseUrl + "/v1/questionaire", parameters, function (res) {
+    	return getRequest(baseUrl + "/v1/questionaire", parameters, function (res) {
     		if (res.status && res.status == 'success') {
     			return pubsub.publish("fetchedQuestionaire", res);
     		}
@@ -305,17 +450,24 @@ var assessmentSdk = (function () {
     	});
     }
 
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-    var Assessment = function Assessment(options) {
-        _classCallCheck(this, Assessment);
+    var globalParameters = {
+        questionaireId: null,
+        questions: {}
+    };
 
-        this.title = options.title || 'Screening Questions';
-        this.subTitle = options.subTitle || 'You can ask some questions before the candidates apply to your job!';
-        this.author = options.author || Error('I was created using a function call!');
-        this.association = options.association || Error('I was created using a function call!');
+    function Assessment(config) {
+        var options = {};
+        // Define option defaults
+        var defaults = {
+            title: 'Screening Questions',
+            subTitle: 'You can ask some questions before the candidates apply to your job!'
 
-        return;
+            // Create options by extending defaults with the passed in arugments
+        };if (config && (typeof config === 'undefined' ? 'undefined' : _typeof(config)) === "object") {
+            options = extendDefaults(defaults, config);
+        }
 
         var questionaireParameters = {
             "association": options.association,
@@ -334,85 +486,95 @@ var assessmentSdk = (function () {
 
                 var data = {
                     "questionaire": questionaireRows,
-                    "questions": questionRows
+                    "prevQuestions": questionRows,
+                    "options": options
                 };
-
                 return pubsub.publish("fetchedQuestionaireDetails", data);
             }
         }, function (res, status, error) {
             return pubsub.publish("failedToFetchQuestionaireDetails", res);
         });
+    }
 
-        function onSuccessfullCreateQuestionaire(topic, res) {
-            var extraParameters = {};
-            extraParameters.questionaireId = res.data;
-            extraParameters.questionData = res.extraParameters.questionData;
-            createQuestion(res.extraParameters.questionData, extraParameters);
-        }
-
-        function onFailCreateQuestionaire(topic, data) {}
-
-        var createdQuestionaireSuccessSubscription = pubsub.subscribe("createdQuestionaire", onSuccessfullCreateQuestionaire);
-        var createdQuestionaireFailSubscription = pubsub.subscribe("failedToCreateQuestionaire", onFailCreateQuestionaire);
-
-        function onSuccessfullCreateQuestion(topic, res) {
-            questions[res.data] = res.extraParameters.questionData;
-            var data = {};
-            data["questions"] = Object.keys(questions);
-            associateQuestionWithQuestionaire(res.extraParameters.questionaireId, 0, data, {});
-        }
-
-        function onFailCreateQuestion(topic, data) {}
-
-        var createdQuestionSuccessSubscription = pubsub.subscribe("createdQuestion", onSuccessfullCreateQuestion);
-        var createdQuestionFailSubscription = pubsub.subscribe("failedToCreateQuestion", onFailCreateQuestion);
-
-        function onSuccessfullAssociateQuestionWithQuestionaire(topic, res) {
-            alert(res.message);
-            // questionIds.push(res.data);
-            // associateQuestionWithQuestionaire(questionIds)
-        }
-
-        function onFailAssociateQuestionWithQuestionaire(topic, data) {}
-
-        var associatedQuestionWithQuestionaireSuccessSubscription = pubsub.subscribe("associatedQuestionWithQuestionaire", onSuccessfullAssociateQuestionWithQuestionaire);
-        var associatedQuestionWithQuestionaireFailSubscription = pubsub.subscribe("failedToAssociateQuestionWithQuestionaire", onFailAssociateQuestionWithQuestionaire);
-
-        function onSuccessfullFetchedQuestionaireDetails(topic, res) {
-            var data = res.data;
-            console.log(this.options);
-            return;
-            options.responseData = data;
-
-            initialize(options);
-
-            onClickUsePrevButtonModal(function () {
-                console.log("hi");
+    function onSuccessfullFetchedQuestionaireDetails(topic, data) {
+        if (data.questionaire.length) {
+            globalParameters.questionaireId = data.questionaire[0]["id"];
+            data.questionaire[0]["sections"][0]["questions"].forEach(function (aQuestion) {
+                globalParameters.questions[aQuestion["id"]] = aQuestion;
             });
+        }
 
-            onClickSaveQuestion(function (questionData) {
+        initialize(data);
+
+        // model.onClick
+
+        onClickUsePrevButtonModal(function () {
+            console.log("hi");
+        });
+
+        onClickAddQuestion(function (questionData) {
+            if (!globalParameters.questionaireId) {
                 var questionaireData = {
-                    "author": options.author,
-                    "tags": options.tags,
-                    "authorType": options.authorType,
+                    "author": data.options.author,
+                    "tags": data.options.tags,
+                    "authorType": data.options.authorType,
                     "invocation": questionaireInvocation["screening"],
-                    "association": options.association,
+                    "association": data.options.association,
                     "sections": [{
                         "type": "static",
-                        "questions": []
+                        "questionIds": []
                     }]
                 };
                 var extraParameters = {};
                 extraParameters.questionData = questionData;
-                createQuestionaire(questionaireData, extraParameters);
-            });
-        }
+                return createQuestionaire(questionaireData, extraParameters);
+            }
 
-        function onFailFetchedQuestionaireDetails(topic, data) {}
+            var extraParameters = {};
+            extraParameters.questionaireId = globalParameters.questionaireId;
+            extraParameters.questionData = questionData;
+            createQuestion(questionData, extraParameters);
+        });
+    }
 
-        var fetchedQuestionaireDetailsSuccessSubscription = pubsub.subscribe("fetchedQuestionaireDetails", onSuccessfullFetchedQuestionaireDetails);
-        var fetchedQuestionaireDetailsFailSubscription = pubsub.subscribe("failedToFetchQuestionaireDetails", onFailFetchedQuestionaireDetails);
-    };
+    function onFailFetchedQuestionaireDetails(topic, data) {}
+
+    var fetchedQuestionaireDetailsSuccessSubscription = pubsub.subscribe("fetchedQuestionaireDetails", onSuccessfullFetchedQuestionaireDetails);
+    var fetchedQuestionaireDetailsFailSubscription = pubsub.subscribe("failedToFetchQuestionaireDetails", onFailFetchedQuestionaireDetails);
+
+    function onSuccessfullCreateQuestionaire(topic, res) {
+        var extraParameters = {};
+        extraParameters.questionaireId = res.data;
+        extraParameters.questionData = res.extraParameters.questionData;
+        createQuestion(res.extraParameters.questionData, extraParameters);
+    }
+
+    function onFailCreateQuestionaire(topic, data) {}
+
+    var createdQuestionaireSuccessSubscription = pubsub.subscribe("createdQuestionaire", onSuccessfullCreateQuestionaire);
+    var createdQuestionaireFailSubscription = pubsub.subscribe("failedToCreateQuestionaire", onFailCreateQuestionaire);
+
+    function onSuccessfullCreateQuestion(topic, res) {
+        globalParameters.questions[res.data] = res.extraParameters.questionData;
+        var data = {};
+        data["questionIds"] = Object.keys(globalParameters.questions);
+        associateQuestionWithQuestionaire(res.extraParameters.questionaireId, 0, data, {});
+    }
+
+    function onFailCreateQuestion(topic, data) {}
+
+    var createdQuestionSuccessSubscription = pubsub.subscribe("createdQuestion", onSuccessfullCreateQuestion);
+    var createdQuestionFailSubscription = pubsub.subscribe("failedToCreateQuestion", onFailCreateQuestion);
+
+    function onSuccessfullAssociateQuestionWithQuestionaire(topic, res) {
+        closeContainer();
+        alert(res.message);
+    }
+
+    function onFailAssociateQuestionWithQuestionaire(topic, data) {}
+
+    var associatedQuestionWithQuestionaireSuccessSubscription = pubsub.subscribe("associatedQuestionWithQuestionaire", onSuccessfullAssociateQuestionWithQuestionaire);
+    var associatedQuestionWithQuestionaireFailSubscription = pubsub.subscribe("failedToAssociateQuestionWithQuestionaire", onFailAssociateQuestionWithQuestionaire);
 
     return Assessment;
 

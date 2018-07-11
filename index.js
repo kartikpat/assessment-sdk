@@ -56,6 +56,7 @@
 	app.set('view engine', 'html');
 	app.set('views', __dirname + '/views');
 	app.use("/static",express.static(__dirname+"/static"))
+	app.use("/bundle",express.static(__dirname+"/bundle"))
 
 	function cprint(text, level){
 		if(mode=="debug")

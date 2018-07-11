@@ -75,6 +75,12 @@ html, body {
 		max-width: 650px;
 		background-color: $white;
 	}
+	&-cross-button {
+		cursor: pointer;
+		&:after {
+			content: '..';
+		}
+	}
 	&-usePrevQuestContainer {
 		padding: 0 15px;
 		.#{$namespace} {
@@ -109,6 +115,7 @@ html, body {
 		}
 	}
 	&-addQuestContainer {
+		height: auto;
 		.#{$namespace} {
 			&-section-header {
 				background-color: $backgroundColor;
@@ -140,6 +147,25 @@ html, body {
 						margin-bottom: 15px;
 					}
 				}
+			}
+			&-options-textarea-wrapper {
+				.#{$namespace} {
+					&-cross-button {
+						position: relative;
+						top: -42px;
+						right: -25px;
+						&:after {
+							content: '..';
+						}
+					}
+				}
+			}
+			&-add-quest-option {
+				padding-top: 0;
+				padding-left: 0;
+			}
+			&-section-footer {
+				padding: 0 15px 15px 15px;
 			}
 		}
 	}

@@ -5,6 +5,5 @@ jQuery(document).ready( function() {
         "association": 123456,
         "wrapperName": "container"
     }
-    var test = new assessmentSdk(config)
-    
+    var test = assessmentSdk(config)
 });

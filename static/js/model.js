@@ -1,16 +1,16 @@
-var settings = {}
 
 import { createElement, transformId, transformClass, toggleSlideOptions, createCheckbox, createSlideDropDown, createSelectDropdown, closeContainer, createTextarea } from './utilities/common';
+import { questionTypeOptions, settings } from "./global"
 
-export function initialize(options) {
-
-    settings.totalQuestAddedCount = 0;
-    settings.options = options
+export function initialize(data) {
+    settings.totalQuestAddedCount = data.questionaire[0]["sections"][0]["questions"].length;
+    settings.options = data.options;
+    settings.prevQuestions = data.prevQuestions;
 
     var wrapper = createElement("div", ["wrapper"]);
     wrapper.html(createWrapperContent());
 
-    $("#" + settings.options.wrapperName).html(wrapper[0].outerHTML)
+    $("#container").html(wrapper[0].outerHTML)
 
     settings.addQuestContainer = $("#" + transformId("addQuestContainer"))
     settings.usePrevQuestContainer = $("#" + transformId("usePrevQuestContainer"))
@@ -20,11 +20,15 @@ export function initialize(options) {
     settings.questionTextarea = $("#" + transformId("questionTextarea"))
     settings.questionType = $("#" + transformId("questionType"))
     settings.usePrevButtonModal = $("#" + transformId("usePrevButtonModal"))
+    settings.questMandatory = $("#" + transformId("addQuestionHeader-isQuestMandatory"))
+    settings.addQuestOptionButton = $("#" + transformId("addQuestOptionButton"))
 
     settings.optionsTextarea = $("." + transformClass(["optionsTextarea"]))
     settings.totalQuestAdded = $("." + transformClass(["totalQuestAdded"]))
 
-    settings.addQuesButton.click(function(e) {
+    updateTotalQuestionsAddedText()
+
+    settings.addQuestButton.click(function(e) {
         e.stopPropagation()
         settings.addQuestContainer.removeClass("hidden")
     })
@@ -37,7 +41,7 @@ export function initialize(options) {
         event.stopPropagation()
     })
 
-    $("." + transformClass(["cancel-button"])).click(function(event) {
+    $("." + transformClass(["cancel-container-button"])).click(function(event) {
         event.stopPropagation()
         closeContainer()
     })
@@ -47,6 +51,40 @@ export function initialize(options) {
     toggleSlideOptions(settings.usePrevQuestContainer)
 
     onClickUsePrevButton()
+
+    onClickAddQuestOption()
+
+    onChangeQuestType()
+
+    onClickDeleteQuestOption()
+}
+
+function onClickDeleteQuestOption() {
+    settings.addQuestContainer.on('click', "." + transformClass(["deleteOptionButton"]), function(e){
+        $(this).parent().remove();
+        var optionsLength = settings.addQuestContainer.find(".my-plugin-optionsTextarea").length
+        if(optionsLength <= 2) {
+            settings.addQuestContainer.find('.' + transformClass(["deleteOptionButton"])).addClass("hidden");
+        }
+    })
+}
+
+function onChangeQuestType() {
+    settings.questionType.change(function(e){
+        var type = $(this).find('option:selected').attr("data-label");
+        settings.addQuestContainer.find("." + transformClass(["section-content"])).html(createAddQuestSectionContent(type))
+    })
+}
+
+function onClickAddQuestOption() {
+    settings.addQuestOptionButton.click(function(e) {
+        e.stopPropagation()
+        var optionsLength = settings.addQuestContainer.find(".my-plugin-optionsTextarea").length
+        settings.addQuestContainer.find("." + transformClass(["options-wrapper"])).append(createTextarea(1, optionsLength))
+        if(optionsLength >= 2) {
+            settings.addQuestContainer.find('.' + transformClass(["deleteOptionButton"])).removeClass("hidden");
+        }
+    })
 }
 
 function onClickUsePrevButton() {
@@ -56,7 +94,7 @@ function onClickUsePrevButton() {
     })
 }
 
-export function onClickSaveQuestion(fn) {
+export function onClickAddQuestion(fn) {
     settings.addQuestButtonModal.click(function(e) {
         e.stopPropagation()
         var data = {}
@@ -66,8 +104,9 @@ export function onClickSaveQuestion(fn) {
         $.each(settings.optionsTextarea, function(index, anOption) {
             ansOptions.push($(anOption).val())
         })
-        data["ansOptions"] = ansOptions
+        data["answerOptions"] = ansOptions
         data["author"] = settings.options.author
+        data["mandatory"] = settings.questMandatory.is(":checked")
 
         fn(data)
     })
@@ -81,6 +120,7 @@ export function onClickUsePrevButtonModal(fn) {
 }
 
 function createWrapperContent() {
+
     var mainContainer = createElement("div", ["main-container"]);
     mainContainer.html(createMainContainer())
 
@@ -88,6 +128,7 @@ function createWrapperContent() {
 }
 
 function createMainContainer() {
+
     var heading = createElement("div", ["heading"]).text(settings.options["title"]);
     var subHeading = createElement("div", ["sub-heading"]).text(settings.options["subTitle"]);
 
@@ -95,55 +136,69 @@ function createMainContainer() {
     // addedQuestContainer.html(createAddedQuestContainer())
 
     var actionButtonsCont = createElement("div", ["action-button-container"]);
-    var text = createElement("span", ["or-text"]).text("or")
-    var usePrevButton = createElement("button", ["button"], "usePrevButton").text(settings.options["usePrevButtonText"]).addClass("hidden");
-    var addQuesButton = createElement("button", ["button"], "addQuesButton").text(settings.options["addQuesButtonText"])
+    var addQuestButton = createElement("button", ["button"], "addQuestButton").text("Add Question");
 
     var addQuestContainer = createElement("div", [
         "container", "addQuestContainer"
     ], "addQuestContainer").addClass("hidden")
     addQuestContainer.html(createAddQuestContainer())
 
-    var usePrevQuestContainer = createElement("div", [
-        "container", "usePrevQuestContainer"
-    ], "usePrevQuestContainer").addClass("hidden");
-    usePrevQuestContainer.html(createUsePrevQuestContainer())
+    var actionButtonsContStr = addQuestButton[0].outerHTML + addQuestContainer[0].outerHTML
 
-    actionButtonsCont.html(addQuesButton[0].outerHTML + text[0].outerHTML + usePrevButton[0].outerHTML + addQuestContainer[0].outerHTML + usePrevQuestContainer[0].outerHTML)
+    if(settings.prevQuestions.length) {
+
+        var text = createElement("span", ["or-text"]).text("or");
+        var usePrevButton = createElement("button", ["button"], "usePrevButton").text("Use previously used questions");
+        var usePrevQuestContainer = createElement("div", [
+            "container", "usePrevQuestContainer"
+        ], "usePrevQuestContainer").addClass("hidden");
+        usePrevQuestContainer.html(createUsePrevQuestContainer(settings.prevQuestions))
+
+        actionButtonsContStr = addQuestButton[0].outerHTML + text[0].outerHTML + usePrevButton[0].outerHTML + addQuestContainer[0].outerHTML + usePrevQuestContainer[0].outerHTML
+    }
+
+    actionButtonsCont.html(actionButtonsContStr)
 
     return heading[0].outerHTML + subHeading[0].outerHTML + actionButtonsCont[0].outerHTML
 }
 
-function createAddedQuestContainer() {
-    var heading = createElement("div", ["heading"]);
-    var questionsContent = createElement("div", ["content"]);
-    questionsContent.html(createQuestionsContent())
-    var selectDropdown = createSelectDropdown(questionTypeOptions, "questionType");
-    var checkbox = createCheckbox("addQuestionHeader-isQuestMandatory", null, null, null, "Mandatory");
-    sectionHeader.html(selectDropdown + checkbox);
-    var sectionContent = createElement("div", ["section-content"]);
-    sectionContent.html(createAddQuestSectionContent("multi"))
-    return sectionHeader[0].outerHTML + sectionContent[0].outerHTML
-}
+// function createAddedQuestContainer() {
+//     var heading = createElement("div", ["heading"]);
+//     var questionsContent = createElement("div", ["content"]);
+//     questionsContent.html(createQuestionsContent())
+//     var selectDropdown = createSelectDropdown(questionTypeOptions, "questionType");
+//     var checkbox = createCheckbox(transformId("addQuestionHeader-isQuestMandatory"), null, null, null, "Mandatory");
+//     sectionHeader.html(selectDropdown + checkbox);
+//     var sectionContent = createElement("div", ["section-content"]);
+//     sectionContent.html(createAddQuestSectionContent(1))
+//     return sectionHeader[0].outerHTML + sectionContent[0].outerHTML
+// }
 
-function createQuestionsContent() {}
+// function createQuestionsContent() {}
 
 function createAddQuestContainer() {
     var sectionHeader = createElement("div", ["section-header"]);
     var selectDropdown = createSelectDropdown(questionTypeOptions, "questionType");
-    var checkbox = createCheckbox("addQuestionHeader-isQuestMandatory", null, null, null, "Mandatory");
+    var checkbox = createCheckbox(transformId("addQuestionHeader-isQuestMandatory"), null, null, null, "Mandatory");
     sectionHeader.html(selectDropdown + checkbox);
     var sectionContent = createElement("div", ["section-content"]);
     sectionContent.html(createAddQuestSectionContent("multi"))
-    return sectionHeader[0].outerHTML + sectionContent[0].outerHTML
+
+    var sectionFooter = createElement("div", ["section-footer"]);
+    var addButton = createElement("button", ["button"], "addQuestButtonModal").text("Add");
+    var cancelButton = createElement("button", ["button", "borderLess-button", "cancel-container-button"]).text("Cancel");
+    sectionFooter.html(addButton[0].outerHTML + cancelButton[0].outerHTML)
+
+    return sectionHeader[0].outerHTML + sectionContent[0].outerHTML +sectionFooter[0].outerHTML
 }
 
-function createUsePrevQuestContainer() {
-    var sectionHeading = createElement("div", ["section-heading"]).text(settings.options["prevQuestContainerHeading"]);
+function createUsePrevQuestContainer(data) {
+    var sectionHeading = createElement("div", ["section-heading"]).text("Use previously added question");
     var sectionContent = createElement("div", ["section-content"]);
+    sectionContent.html(createUsePrevQuestSectionContent(data))
     var sectionFooter = createElement("div", ["section-footer"]);
     var addButton = createElement("button", ["button"], "usePrevButtonModal").text("Add selected questions");
-    var cancelButton = createElement("button", ["button", "cancel-button"]).text("Cancel");
+    var cancelButton = createElement("button", ["button", "borderLess-button", , "cancel-container-button"]).text("Cancel");
     var totalQuestionsAdded = createElement("div", ["quest-added-text", "totalQuestAdded"]).text("Questions added: 0/10")
     sectionFooter.html(addButton[0].outerHTML + cancelButton[0].outerHTML + totalQuestionsAdded[0].outerHTML)
 
@@ -155,8 +210,8 @@ function createUsePrevQuestSectionContent(data) {
     data.forEach(function(aQuestion) {
         var sectionRow = createElement("div", ["section-row"]);
         var checkbox = createCheckbox("addQuestSectionRow" + aQuestion["id"], null, aQuestion["id"], null, aQuestion["question"]);
-        if (aQuestion["ansOptions"].length) {
-            var slideDropdown = createSlideDropDown(aQuestion["ansOptions"])
+        if (aQuestion["answerOptions"].length) {
+            var slideDropdown = createSlideDropDown(aQuestion["answerOptions"])
         }
 
         sectionRow.html(checkbox + slideDropdown)
@@ -171,17 +226,15 @@ function createAddQuestSectionContent(questionType) {
     var questionText = createElement("div", ["text"]).text("Question Text");
     var questionTextarea = createElement("textarea", ["textarea"], "questionTextarea").attr({"placeholder": "What would you like to ask?"});
 
-    var addQuestButton = createElement("button", ["button"], "addQuestButtonModal").text("Save");
-    var cancelButton = createElement("button", ["button", "borderLess-button", "cancel-button"]).text("Cancel");
-
     if (["multi", "single"].indexOf(questionType) != -1) {
         let optionsWrapper = createElement("div", ["options-wrapper"]);
-        let optionTextArea = createTextarea(2)
-        let addOptionButton = createElement("button", ["button", "borderLess-button", "add-option"]).text("Add");
-        optionsWrapper.html(optionTextArea + addOptionButton[0].outerHTML)
-        return questionText[0].outerHTML + questionTextarea[0].outerHTML + optionsWrapper[0].outerHTML + addQuestButton[0].outerHTML + cancelButton[0].outerHTML;
+        let optionTextArea = createTextarea(2, 0)
+        let addOptionButton = createElement("button", ["button", "borderLess-button", "add-quest-option"], "addQuestOptionButton").text("Add");
+        optionsWrapper.html(optionTextArea)
+        return questionText[0].outerHTML + questionTextarea[0].outerHTML + optionsWrapper[0].outerHTML + addOptionButton[0].outerHTML;
     }
-    return questionText[0].outerHTML + questionTextarea[0].outerHTML + addQuestButton[0].outerHTML + cancelButton[0].outerHTML;
+
+    return questionText[0].outerHTML + questionTextarea[0].outerHTML;
 }
 
 function onClickPrevQuestCheckboxModal() {
@@ -211,6 +264,6 @@ function updateTotalQuestionsAddedText() {
     settings.totalQuestAdded.text("Questions added: " + settings.totalQuestAddedCount + "/10")
 }
 
-function populatePreviousUsedQuestions(data) {
-    settings.usePrevQuestContainer.find("." + transformClass(["section-content"])).html(createUsePrevQuestSectionContent(data))
-}
+// export function populatePreviousUsedQuestions(data) {
+//     settings.usePrevQuestContainer.find("." + transformClass(["section-content"])).html(createUsePrevQuestSectionContent(data))
+// }

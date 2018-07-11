@@ -1,3 +1,15 @@
+import {pluginName} from '../global'
+
+export function extendDefaults(source, properties) {
+    var property;
+    for (property in properties) {
+        if (properties.hasOwnProperty(property)) {
+            source[property] = properties[property];
+        }
+    }
+    return source;
+}
+
 export function transformClass(classNameArr) {
     var classNameStr = ''
     var transformedArr = []
@@ -50,10 +62,13 @@ export function createSlideDropDown(options) {
 }
 
 export function createSelectDropdown(options, id) {
-    var select = createElement("select", ["select-dropdown"]);
+    var select = createElement("select", ["select-dropdown"],id);
     var optionRowStr = ''
     options.forEach(function(anOption) {
-        var optionRow = createElement("option", ["option-row"], id).attr({"value": anOption["value"]}).text(anOption["text"])
+        var optionRow = createElement("option", ["option-row"]).attr({
+            "value": anOption["value"],
+            "data-label": anOption["data-label"]
+        }).text(anOption["text"])
         optionRowStr += optionRow[0].outerHTML
     });
     select.html(optionRowStr)
@@ -71,18 +86,23 @@ export function closeContainer() {
     $("." + transformClass(["container"])).addClass("hidden")
 }
 
-export function createTextarea(n) {
+export function createTextarea(n, offset) {
     if (!n)
         return
 
+    var j = offset || 0;
     var i;
     var textareaStr = ''
     for (i = 0; i < n; i++) {
+        var optionsTextareaWrapper = createElement("div",["options-textarea-wrapper"])
         var textarea = createElement("textarea", ["textarea", "small", "optionsTextarea"]).attr({
-            "placeholder": "Option " + (
-            i + 1) + ""
-        });;
-        textareaStr += textarea[0].outerHTML
+            "placeholder": "Option " + (j + 1)
+        });
+        j++;
+        var cancelButton = createElement("span", ["cross-button", "deleteOptionButton"]).addClass("hidden")
+        optionsTextareaWrapper.html(textarea[0].outerHTML + cancelButton[0].outerHTML)
+
+        textareaStr += optionsTextareaWrapper[0].outerHTML
     }
     return textareaStr
 }

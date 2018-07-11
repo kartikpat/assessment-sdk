@@ -19,6 +19,7 @@ var rollup = require('rollup');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var sourcemaps = require('gulp-sourcemaps');
+var nodeResolve = require('rollup-plugin-node-resolve');
 
 const babelConfig = {
     paths: {
@@ -98,6 +99,7 @@ gulp.task('make:iife', () => {
             exports: 'default'
         },
         plugins: [
+            nodeResolve(),
             rollupBabel(babelConfig.babel)
         ],
         rollup: rollup
