@@ -94,9 +94,10 @@ gulp.task('make:iife', () => {
         input: babelConfig.paths.index,
         output: {
             file: 'bundle.js',
-            format: 'iife',
+            format: 'amd',
             name: 'assessmentSdk',
-            exports: 'default'
+            exports: 'default',
+            sourcemap: true
         },
         plugins: [
             nodeResolve(),
@@ -135,25 +136,25 @@ gulp.task('default', ['watch']);
 
 
 
-// gulp.task('iife:min', () => {
-//     return rollupStream({
-//         input: babelConfig.paths.index,
-//         output: {
-//             file: 'bundle.js',
-//             format: 'iife',
-//             name: 'te',
-//             exports: 'default'
-//         },
-//         plugins: [
-//             rollupBabel(babelConfig.babel)
-//         ],
-//         sourcemap: true,
-//         rollup: rollup
-//     })
-//     .pipe(source('bundle.js'))
-//     .pipe(buffer())
-//     .pipe(sourcemaps.init({loadMaps: true}))
-//     .pipe(uglify())
-//     .pipe(sourcemaps.write('./test'))
-//     .pipe(gulp.dest(babelConfig.paths.dist));
-// });
+gulp.task('iife:min', () => {
+    return rollupStream({
+        input: babelConfig.paths.index,
+        output: {
+            file: 'bundle.js',
+            format: 'iife',
+            name: 'te',
+            exports: 'default'
+        },
+        plugins: [
+            rollupBabel(babelConfig.babel)
+        ],
+        sourcemap: true,
+        rollup: rollup
+    })
+    .pipe(source('bundle.js'))
+    .pipe(buffer())
+    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(uglify())
+    .pipe(sourcemaps.write('./test'))
+    .pipe(gulp.dest(babelConfig.paths.dist));
+});
