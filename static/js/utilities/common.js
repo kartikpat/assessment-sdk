@@ -82,9 +82,7 @@ export function toggleSlideOptions(elem) {
     })
 }
 
-export function closeContainer() {
-    $("." + transformClass(["container"])).addClass("hidden")
-}
+
 
 export function createTextarea(n, offset) {
     if (!n)

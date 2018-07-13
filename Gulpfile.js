@@ -14,7 +14,6 @@ var staticMapper = require("./asset-mapper.json");
 var uglify = require('gulp-uglify');
 var gulpDebug = require('gulp-debug');
 var rollupBabel = require('rollup-plugin-babel');
-var rollupStream = require('rollup-stream');
 var rollup = require('rollup');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
@@ -89,27 +88,16 @@ gulp.task('build-sass',function(){
 		.pipe(gulp.dest('static/css'))
 });
 
-gulp.task('make:iife', () => {
-    return rollupStream({
+gulp.task('iife:make', () => {
+    return rollup.rollup({
         input: babelConfig.paths.index,
-        output: {
-            file: 'bundle.js',
-            format: 'amd',
-            name: 'assessmentSdk',
-            exports: 'default',
-            sourcemap: true
-        },
         plugins: [
             nodeResolve(),
             rollupBabel(babelConfig.babel)
-        ],
-        rollup: rollup
-    })
-    .pipe(source('bundle.js'))
-    .pipe(buffer())
-    .pipe(sourcemaps.init({loadMaps: true}))
-    .pipe(sourcemaps.write('./bundle'))
-    .pipe(gulp.dest(babelConfig.paths.dist));
+        ]
+    }).then(bundle => {
+        return bundle.write({file: './bundle/bundle.js', exports: 'default', format: 'iife', name: 'assessmentSdk', sourcemap: true});
+    });
 });
 
 //For running test through mocha
@@ -125,36 +113,11 @@ gulp.task('watch-test', function(){
 })
 
 
-gulp.task('watch', ['clean','build-sass', 'build-css', 'make:iife'], function(){
+gulp.task('watch', ['clean','build-sass', 'build-css', 'iife:make'], function(){
 	gulp.watch('static/scss/**/*.scss', ['build-sass']);
-    gulp.watch('static/js/**/*.js', ['make:iife'])
+    gulp.watch('static/js/**/*.js', ['iife:make'])
 });
 
 gulp.task('build', ['clean', 'build-sass', 'build-css', 'build-js']);
 
 gulp.task('default', ['watch']);
-
-
-
-gulp.task('iife:min', () => {
-    return rollupStream({
-        input: babelConfig.paths.index,
-        output: {
-            file: 'bundle.js',
-            format: 'iife',
-            name: 'te',
-            exports: 'default'
-        },
-        plugins: [
-            rollupBabel(babelConfig.babel)
-        ],
-        sourcemap: true,
-        rollup: rollup
-    })
-    .pipe(source('bundle.js'))
-    .pipe(buffer())
-    .pipe(sourcemaps.init({loadMaps: true}))
-    .pipe(uglify())
-    .pipe(sourcemaps.write('./test'))
-    .pipe(gulp.dest(babelConfig.paths.dist));
-});

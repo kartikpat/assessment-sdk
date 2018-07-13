@@ -100,6 +100,10 @@ html, body {
   padding: 7px 14px;
   border-radius: 4px;
   outline: none; }
+  .my-plugin-button.my-plugin-disabled {
+    border-color: #e4e4e4;
+    background-color: #f8f8f8;
+    color: #bbb8b8; }
 
 .my-plugin-borderLess-button {
   color: #155d9a;
@@ -108,7 +112,6 @@ html, body {
   background: none; }
 
 .my-plugin-action-button-container {
-  position: relative;
   line-height: 32px; }
   .my-plugin-action-button-container .my-plugin-or-text {
     display: inline-block;
@@ -119,8 +122,8 @@ html, body {
     color: #818181; }
 
 .my-plugin-container {
-  position: absolute;
-  top: 0;
+  position: relative;
+  top: -32px;
   left: 0;
   box-shadow: 3px 3px 12.74px 1.26px rgba(0, 0, 0, 0.16);
   border: 1px solid #eee;
@@ -135,7 +138,50 @@ html, body {
 .my-plugin-cross-button {
   cursor: pointer; }
   .my-plugin-cross-button:after {
-    content: '..'; }
+    content: 'cross'; }
+
+.my-plugin-sort-icon:after {
+  content: 'sort'; }
+
+.my-plugin-mandatory-icon:after {
+  content: 'm'; }
+
+.my-plugin-edit-icon {
+  cursor: pointer; }
+  .my-plugin-edit-icon:after {
+    content: 'edit'; }
+
+.my-plugin-delete-icon {
+  cursor: pointer; }
+  .my-plugin-delete-icon:after {
+    content: 'delete'; }
+
+.my-plugin-added-quest-container {
+  margin-bottom: 15px;
+  width: 70%; }
+  .my-plugin-added-quest-container .my-plugin-section-heading {
+    font-size: 14px;
+    color: #2b2b2b;
+    font-weight: bold; }
+  .my-plugin-added-quest-container .my-plugin-added-question-wrapper {
+    display: inline-block;
+    width: calc(100% - 200px); }
+  .my-plugin-added-quest-container .my-plugin-section-row {
+    padding: 10px 0;
+    border-bottom: 1px solid #e4e4e4; }
+    .my-plugin-added-quest-container .my-plugin-section-row .my-plugin-sort-icon {
+      display: inline-block;
+      width: 50px;
+      vertical-align: top; }
+    .my-plugin-added-quest-container .my-plugin-section-row .my-plugin-slide-wrapper {
+      padding-left: 0px; }
+    .my-plugin-added-quest-container .my-plugin-section-row .my-plugin-question-actions-container {
+      display: inline-block;
+      width: 150px;
+      vertical-align: top; }
+    .my-plugin-added-quest-container .my-plugin-section-row .my-plugin-question-action-icon {
+      display: inline-block;
+      width: 33%; }
 
 .my-plugin-usePrevQuestContainer {
   padding: 0 15px; }
@@ -191,8 +237,6 @@ html, body {
     position: relative;
     top: -42px;
     right: -25px; }
-    .my-plugin-addQuestContainer .my-plugin-options-textarea-wrapper .my-plugin-cross-button:after {
-      content: '..'; }
   .my-plugin-addQuestContainer .my-plugin-add-quest-option {
     padding-top: 0;
     padding-left: 0; }

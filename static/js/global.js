@@ -1,7 +1,13 @@
 export var pluginName = "my-plugin-"
 export var baseUrl_local = "http://127.0.0.1:5000"
 export var baseUrl = "http://127.0.0.1:5000"
-export var settings = {}
+
+export var globalParameters = {
+    questionaireId: null,
+    questionIds: [],
+    prevQuestions: {}
+}
+
 export var questionTypeOptions = [
     {
         "value": 1,
