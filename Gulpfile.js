@@ -118,6 +118,6 @@ gulp.task('watch', ['clean','build-sass', 'build-css', 'iife:make'], function(){
     gulp.watch('static/js/**/*.js', ['iife:make'])
 });
 
-gulp.task('build', ['clean', 'build-sass', 'build-css', 'build-js']);
+gulp.task('build', ['clean', 'build-sass', 'build-css','iife:make', 'build-js']);
 
 gulp.task('default', ['watch']);

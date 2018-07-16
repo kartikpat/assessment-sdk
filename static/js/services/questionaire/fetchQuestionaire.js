@@ -1,3 +1,5 @@
+import { baseUrl, baseUrl_local } from "../../global"
+
 export function fetchQuestionaire(parameters){
 	return getRequest(baseUrl+"/v1/questionaire", parameters,function(res){
 		if(res.status && res.status =='success'){

@@ -20,9 +20,9 @@
     "babel-core": "^6.26.3",
     "body-parser": "^1.17.2",
     "compression": "^1.6.2",
-    "dragula": "^3.7.2",
     "express": "^4.15.3",
-    "hogan-express": "^0.5.2"
+    "hogan-express": "^0.5.2",
+    "sortablejs": "^1.7.0"
   },
   "devDependencies": {
     "babel-preset-env": "^1.7.0",

@@ -1,5 +1,77 @@
+@charset "UTF-8";
+@font-face {
+  font-family: 'fontello';
+  src: url("../font-sdk/fontello.eot?97015054");
+  src: url("../font-sdk/fontello.eot?97015054#iefix") format("embedded-opentype"), url("../font-sdk/fontello.woff2?97015054") format("woff2"), url("../font-sdk/fontello.woff?97015054") format("woff"), url("../font-sdk/fontello.ttf?97015054") format("truetype"), url("../font-sdk/fontello.svg?97015054#fontello") format("svg");
+  font-weight: normal;
+  font-style: normal; }
+
+/* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it. */
+/* Note, that will break hinting! In other OS-es font will be not as sharp as it could be */
+/*
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: 'fontello';
+    src: url('../font/fontello.svg?97015054#fontello') format('svg');
+  }
+}
+*/
+[class^="my-plugin-icon-"]:before, [class*=" my-plugin-icon-"]:before {
+  font-family: "fontello";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+  display: inline-block;
+  text-decoration: inherit;
+  width: 1em;
+  margin-right: .2em;
+  text-align: center;
+  /* opacity: .8; */
+  /* For safety - reset parent styles, that can break glyph codes*/
+  font-variant: normal;
+  text-transform: none;
+  /* fix buttons height, for twitter bootstrap */
+  line-height: 1em;
+  /* Animation center compensation - margins should be symmetric */
+  /* remove if not needed */
+  margin-left: .2em;
+  /* you can be more comfortable with increased icons size */
+  /* font-size: 120%; */
+  /* Font smoothing. That was taken from TWBS */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Uncomment for 3D effect */
+  /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */ }
+
+.my-plugin {
+  /* '' */
+  /* '' */
+  /* '' */
+  /* '' */
+  /* '' */
+  /* '' */
+  /* '' */ }
+  .my-plugin-icon-cross:before {
+    content: '\e800'; }
+  .my-plugin-icon-left:before {
+    content: '\e801'; }
+  .my-plugin-icon-asterisk:before {
+    content: '\e802'; }
+  .my-plugin-icon-delete:before {
+    content: '\e803'; }
+  .my-plugin-icon-edit:before {
+    content: '\e804'; }
+  .my-plugin-icon-tick2:before {
+    content: '\e805'; }
+  .my-plugin-icon-tick:before {
+    content: '\e806'; }
+
 .hidden {
   display: none !important; }
+
+.my-plugin-ghost {
+  opacity: .5;
+  background: transparent; }
 
 .my-plugin-primary-text {
   font-size: 16px;
@@ -12,7 +84,9 @@
   display: inline-block;
   cursor: pointer;
   font-size: 16px;
-  color: #2b2b2b; }
+  color: #2b2b2b;
+  line-height: 1.4;
+  word-wrap: break-word; }
 
 .my-plugin-checkbox-wrapper input + label {
   padding: 5px 0 4px 35px;
@@ -56,33 +130,13 @@
   font-size: 14px;
   line-height: 1.5;
   overflow-y: hidden;
-  outline: none; }
+  outline: none;
+  resize: none; }
   .my-plugin-textarea.my-plugin-small {
     min-height: 50px;
     width: 50%;
     display: inline-block;
     padding-bottom: 0px; }
-
-* {
-  box-sizing: border-box; }
-
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0; }
-
-.my-plugin-wrapper {
-  padding: 20px;
-  font-family: "Droid Sans", sans-serif; }
-
-.my-plugin-heading {
-  color: #2b2b2b;
-  font-size: 16px; }
-
-.my-plugin-sub-heading {
-  color: #818181;
-  padding: 5px 0 15px 0;
-  font-size: 14px; }
 
 .my-plugin-button {
   -webkit-appearance: none;
@@ -111,6 +165,27 @@ html, body {
   border: 0;
   background: none; }
 
+* {
+  box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0; }
+
+.my-plugin-wrapper {
+  padding: 20px;
+  font-family: "Droid Sans", sans-serif; }
+
+.my-plugin-heading {
+  color: #2b2b2b;
+  font-size: 16px; }
+
+.my-plugin-sub-heading {
+  color: #818181;
+  padding: 5px 0 15px 0;
+  font-size: 14px; }
+
 .my-plugin-action-button-container {
   line-height: 32px; }
   .my-plugin-action-button-container .my-plugin-or-text {
@@ -137,28 +212,20 @@ html, body {
 
 .my-plugin-cross-button {
   cursor: pointer; }
-  .my-plugin-cross-button:after {
-    content: 'cross'; }
 
-.my-plugin-sort-icon:after {
-  content: 'sort'; }
-
-.my-plugin-mandatory-icon:after {
-  content: 'm'; }
+.my-plugin-sort-icon {
+  cursor: move;
+  cursor: -webkit-grabbing; }
 
 .my-plugin-edit-icon {
   cursor: pointer; }
-  .my-plugin-edit-icon:after {
-    content: 'edit'; }
 
 .my-plugin-delete-icon {
   cursor: pointer; }
-  .my-plugin-delete-icon:after {
-    content: 'delete'; }
 
 .my-plugin-added-quest-container {
   margin-bottom: 15px;
-  width: 70%; }
+  width: 65%; }
   .my-plugin-added-quest-container .my-plugin-section-heading {
     font-size: 14px;
     color: #2b2b2b;
@@ -166,22 +233,43 @@ html, body {
   .my-plugin-added-quest-container .my-plugin-added-question-wrapper {
     display: inline-block;
     width: calc(100% - 200px); }
+  .my-plugin-added-quest-container .my-plugin-question-text {
+    color: #2b2b2b;
+    font-size: 16px;
+    line-height: 1.4;
+    padding-right: 30px;
+    word-wrap: break-word; }
   .my-plugin-added-quest-container .my-plugin-section-row {
-    padding: 10px 0;
+    padding: 15px 0;
     border-bottom: 1px solid #e4e4e4; }
     .my-plugin-added-quest-container .my-plugin-section-row .my-plugin-sort-icon {
       display: inline-block;
       width: 50px;
-      vertical-align: top; }
+      vertical-align: top;
+      color: #818181; }
     .my-plugin-added-quest-container .my-plugin-section-row .my-plugin-slide-wrapper {
-      padding-left: 0px; }
+      padding-left: 0px;
+      padding-top: 5px; }
     .my-plugin-added-quest-container .my-plugin-section-row .my-plugin-question-actions-container {
       display: inline-block;
       width: 150px;
       vertical-align: top; }
     .my-plugin-added-quest-container .my-plugin-section-row .my-plugin-question-action-icon {
       display: inline-block;
-      width: 33%; }
+      width: 33%;
+      color: #818181;
+      font-size: 18px; }
+  .my-plugin-added-quest-container .my-plugin-quest-edit-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 33%; }
+    .my-plugin-added-quest-container .my-plugin-quest-edit-wrapper .my-plugin-edit-quest-container {
+      position: absolute;
+      height: auto;
+      width: 500px;
+      right: 0;
+      top: 0;
+      left: unset; }
 
 .my-plugin-usePrevQuestContainer {
   padding: 0 15px; }
@@ -207,40 +295,41 @@ html, body {
     display: inline-block;
     float: right; }
   .my-plugin-usePrevQuestContainer .my-plugin-section-row {
-    padding-bottom: 5px; }
+    padding-bottom: 10px; }
 
-.my-plugin-addQuestContainer {
+.my-plugin-quest-container {
   height: auto; }
-  .my-plugin-addQuestContainer .my-plugin-section-header {
+  .my-plugin-quest-container .my-plugin-section-header {
     background-color: #f3f3f3;
     padding: 0 15px;
     line-height: 70px; }
-  .my-plugin-addQuestContainer .my-plugin-checkbox-wrapper {
+  .my-plugin-quest-container .my-plugin-checkbox-wrapper {
     display: inline-block;
     float: right; }
-    .my-plugin-addQuestContainer .my-plugin-checkbox-wrapper input + label {
+    .my-plugin-quest-container .my-plugin-checkbox-wrapper input + label {
       padding: 0 0 0 25px; }
-    .my-plugin-addQuestContainer .my-plugin-checkbox-wrapper label {
+    .my-plugin-quest-container .my-plugin-checkbox-wrapper label {
       font-size: 14px; }
-  .my-plugin-addQuestContainer .my-plugin-section-content {
+  .my-plugin-quest-container .my-plugin-section-content {
     font-size: 16px;
     color: #2b2b2b;
     line-height: 1.2;
     padding: 15px; }
-    .my-plugin-addQuestContainer .my-plugin-section-content .my-plugin-text {
+    .my-plugin-quest-container .my-plugin-section-content .my-plugin-text {
       font-size: 14px;
       color: #2b2b2b;
       padding-bottom: 10px; }
-    .my-plugin-addQuestContainer .my-plugin-section-content .my-plugin-textarea {
+    .my-plugin-quest-container .my-plugin-section-content .my-plugin-textarea {
       margin-bottom: 15px; }
-  .my-plugin-addQuestContainer .my-plugin-options-textarea-wrapper .my-plugin-cross-button {
+  .my-plugin-quest-container .my-plugin-options-textarea-wrapper .my-plugin-cross-button {
     position: relative;
-    top: -42px;
-    right: -25px; }
-  .my-plugin-addQuestContainer .my-plugin-add-quest-option {
+    top: -37px;
+    right: -20px;
+    color: #818181; }
+  .my-plugin-quest-container .my-plugin-add-quest-option {
     padding-top: 0;
     padding-left: 0; }
-  .my-plugin-addQuestContainer .my-plugin-section-footer {
+  .my-plugin-quest-container .my-plugin-section-footer {
     padding: 0 15px 15px 15px; }
 
 .my-plugin-slide-wrapper {
@@ -257,6 +346,8 @@ html, body {
     display: none; }
   .my-plugin-slide-wrapper .my-plugin-option-row {
     display: list-item;
-    margin-left: 18px; }
+    margin-left: 18px;
+    font-size: 14px;
+    color: #2b2b2b; }
     .my-plugin-slide-wrapper .my-plugin-option-row:not(:last-child) {
       padding-bottom: 5px; }

@@ -1,7 +1,6 @@
 import * as model from './model';
 import {extendDefaults} from './utilities/common'
-import { globalParameters } from "./global"
-import { questionaireInvocation, baseUrl} from './global'
+import { globalParameters, baseUrl, baseUrl_local, questionaireInvocation } from "./global"
 import {associateQuestionWithQuestionaire} from './services/association/associateQuestionWithQuestionaire';
 import {createQuestion} from './services/question/createQuestion';
 import {fetchQuestions} from './services/question/fetchQuestions';
@@ -21,13 +20,32 @@ export default function Assessment(config) {
         options = extendDefaults(defaults, config);
     }
 
+    var questionsParameters = {
+        "author": options.author
+    }
+
+    if(!options.association) {
+        $.when(null, fetchQuestions(questionsParameters)).then(function(a, b) {
+            if (b[0] && b[0]["status"] == "success") {
+
+                var questionRows = b[0]['data'];
+
+                var data = {
+                    "prevQuestions": questionRows,
+                    "options": options
+                }
+                return pubsub.publish("fetchedQuestionaireDetails", data);
+            }
+
+        }, function(res, status, error) {
+            return pubsub.publish("failedToFetchQuestionaireDetails", res);
+        });
+        return
+    }
+
     var questionaireParameters = {
         "association": options.association,
         "invocation": questionaireInvocation["screening"]
-    }
-
-    var questionsParameters = {
-        "author": options.author
     }
 
     $.when(fetchQuestionaire(questionaireParameters), fetchQuestions(questionsParameters)).then(function(a, b) {
@@ -50,7 +68,11 @@ export default function Assessment(config) {
 }
 
 function onSuccessfullFetchedQuestionaireDetails(topic, data) {
-    if(data.questionaire.length) {
+    if(data.options) {
+        globalParameters.options = data.options;
+    }
+
+    if(data.questionaire && data.questionaire.length) {
         globalParameters.questionaireId = data.questionaire[0]["id"]
         data.questionaire[0]["sections"][0]["questions"].forEach(function(aQuestion){
             globalParameters.questionIds.push(aQuestion["id"]);
@@ -58,21 +80,55 @@ function onSuccessfullFetchedQuestionaireDetails(topic, data) {
     }
 
     if(data.prevQuestions.length) {
-        data.prevQuestions.forEach(function(aPrevQuestion){
-            globalParameters.prevQuestions[aPrevQuestion["id"]] = aPrevQuestion;
+        var prevQuestions = []
+        data.prevQuestions.forEach(function(aPrevQuestion) {
+            var index = globalParameters["questionIds"].indexOf(aPrevQuestion["id"]);
+            if (index == -1) {
+                prevQuestions.push(aPrevQuestion)
+                globalParameters.prevQuestions[aPrevQuestion["id"]] = aPrevQuestion;
+            }
         })
+        data.prevQuestions = prevQuestions
     }
 
     model.initialize(data)
 
-    // model.onClick
+    model.setSortableList(function(questionIds) {
+        var data = {}
+        data["questionIds"] = questionIds;
+
+        var extraParameters = {}
+        extraParameters.questionIds = questionIds
+        extraParameters.origin = "sortable";
+        associateQuestionWithQuestionaire(globalParameters.questionaireId, 0, data, extraParameters)
+    })
 
     model.onClickUsePrevButtonModal(function(prevQuestionIds) {
         var data = {}
         data["questionIds"] = globalParameters.questionIds.concat(prevQuestionIds)
+
         var extraParameters = {}
         extraParameters.prevQuestionIds = prevQuestionIds
         extraParameters.origin = "prevUsed";
+        extraParameters.data = data;
+
+        if(!globalParameters.questionaireId) {
+            var questionaireData = {
+                "author": globalParameters.options.author,
+                "tags": globalParameters.options.tags,
+                "authorType": globalParameters.options.authorType,
+                "invocation": questionaireInvocation["screening"],
+                "association": globalParameters.options.association,
+                "sections": [
+                    {
+                        "type": "static",
+                        "questionIds": []
+                    }
+                ]
+            };
+            return createQuestionaire(questionaireData, extraParameters)
+        }
+
         associateQuestionWithQuestionaire(globalParameters.questionaireId, 0, data, extraParameters)
     })
 
@@ -82,11 +138,11 @@ function onSuccessfullFetchedQuestionaireDetails(topic, data) {
 
         if(!globalParameters.questionaireId) {
             var questionaireData = {
-                "author": data.options.author,
-                "tags": data.options.tags,
-                "authorType": data.options.authorType,
+                "author": globalParameters.options.author,
+                "tags": globalParameters.options.tags,
+                "authorType": globalParameters.options.authorType,
                 "invocation": questionaireInvocation["screening"],
-                "association": data.options.association,
+                "association": globalParameters.options.association,
                 "sections": [
                     {
                         "type": "static",
@@ -101,7 +157,6 @@ function onSuccessfullFetchedQuestionaireDetails(topic, data) {
     })
 
     model.onClickDeleteQuestion(function(id){
-        debugger
         var data = {}
         data["questionIds"] = globalParameters.questionIds;
         var index = data["questionIds"].indexOf(id);
@@ -113,6 +168,10 @@ function onSuccessfullFetchedQuestionaireDetails(topic, data) {
         extraParameters.questionId = id;
         associateQuestionWithQuestionaire(globalParameters.questionaireId, 0, data, extraParameters)
     })
+
+    model.onClickEditQuestionModal(function(id){
+        return
+    })
 }
 
 function onFailFetchedQuestionaireDetails(topic, data) {}
@@ -123,6 +182,13 @@ var fetchedQuestionaireDetailsFailSubscription = pubsub.subscribe("failedToFetch
 function onSuccessfullCreateQuestionaire(topic, res) {
     globalParameters.questionaireId = res.data;
     var extraParameters = {}
+    if(res.extraParameters.origin == "prevUsed") {
+        var data = res.extraParameters.data;
+        extraParameters.prevQuestionIds = res.extraParameters.prevQuestionIds
+        extraParameters.origin = "prevUsed";
+        return associateQuestionWithQuestionaire(globalParameters.questionaireId, 0, data, extraParameters)
+    }
+
     extraParameters.questionData = res.extraParameters.questionData;
     createQuestion(res.extraParameters.questionData, extraParameters)
 }
@@ -166,18 +232,29 @@ function onSuccessfullAssociateQuestionWithQuestionaire(topic, res) {
         return model.deleteAddedQuestionRow(res.extraParameters.questionId)
     }
 
+    if(res.extraParameters.origin == "sortable") {
+        return alert("successfully sorted")
+    }
+
     var questionsToAppend = []
     if(res.extraParameters.origin == "prevUsed") {
         globalParameters.questionIds = globalParameters.questionIds.concat(res.extraParameters.prevQuestionIds)
         res.extraParameters.prevQuestionIds.forEach(function(aPrevQuestionId){
             questionsToAppend.push(globalParameters.prevQuestions[aPrevQuestionId])
+            model.deletePrevUsedQuestionRow(aPrevQuestionId)
+            delete globalParameters.prevQuestions[aPrevQuestionId];
         })
+
+        if(Object.keys(globalParameters.prevQuestions).length === 0 && globalParameters.prevQuestions.constructor === Object) {
+            model.hideUsePrevButton()
+        }
+
     }
     if(res.extraParameters.origin == "newlyAdded") {
         globalParameters.questionIds = globalParameters.questionIds.concat(res.extraParameters.questionId)
         questionsToAppend.push(res.extraParameters.questionData)
-
     }
+
     model.updateTotalQuestionsAddedText(globalParameters.questionIds.length)
     model.appendQuestionsAdded(questionsToAppend)
     if(globalParameters.questionIds.length >= 10) {

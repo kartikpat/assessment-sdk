@@ -24,36 +24,6 @@ html, body {
 		padding: 5px 0 15px 0;
 		font-size: $secondaryTextSize;
 	}
-	&-button {
-		-webkit-appearance: none;
-	    -moz-appearance: none;
-	    -ms-appearance: none;
-	    -o-appearance: none;
-		border: 1px solid $buttonBorder;
-		color: $primaryColor;
-	    margin: 0;
-	    background: $white;
-	    font-size: 14px;
-	    display: inline-block;
-	    vertical-align: top;
-	    cursor: pointer;
-	    padding: 7px 14px;
-		border-radius: 4px;
-		outline: none;
-		&.#{$namespace} {
-            &-disabled {
-				border-color: $borderColorLight;
-				background-color: $disabledBackgroundColor;
-				color: $disabledTextColor;
-            }
-        }
-	}
-	&-borderLess-button {
-		color: $linkColor;
-		box-shadow: none;
-		border: 0;
-		background: none;
-	}
 	&-action-button-container {
 		line-height: 32px;
 		.#{$namespace} {
@@ -80,38 +50,28 @@ html, body {
 		width: 100%;
 		max-width: 650px;
 		background-color: $white;
+
 	}
 	&-cross-button {
 		cursor: pointer;
-		&:after {
-			content: 'cross';
-		}
 	}
 	&-sort-icon {
-		&:after {
-			content: 'sort';
-		}
+		cursor: move;
+		cursor: -webkit-grabbing;
 	}
 	&-mandatory-icon {
-		&:after {
-			content: 'm';
-		}
+
 	}
 	&-edit-icon {
 		cursor: pointer;
-		&:after {
-			content: 'edit';
-		}
 	}
 	&-delete-icon {
 		cursor: pointer;
-		&:after {
-			content: 'delete';
-		}
+
 	}
 	&-added-quest-container {
 		margin-bottom: 15px;
-		width: 70%;
+		width: 65%;
 		.#{$namespace} {
 			&-section-heading {
 				font-size: 14px;
@@ -122,17 +82,26 @@ html, body {
 				display: inline-block;
 				width: calc(100% - 200px);
 			}
+			&-question-text {
+				color: $primaryColor;
+				font-size: $primaryTextSize;
+				line-height: 1.4;
+				padding-right: 30px;
+				word-wrap: break-word;
+			}
 			&-section-row {
-				padding: 10px 0;
+				padding: 15px 0;
 				border-bottom: 1px solid $borderColorLight;
 				.#{$namespace} {
 					&-sort-icon {
 						display: inline-block;
 						width: 50px;
 						vertical-align: top;
+						color: $secondaryColor;
 					}
 					&-slide-wrapper {
 						padding-left: 0px;
+						padding-top: 5px;
 					}
 					&-question-actions-container {
 						display: inline-block;
@@ -142,6 +111,23 @@ html, body {
 					&-question-action-icon {
 						display: inline-block;
 						width: 33%;
+						color: $secondaryColor;
+						font-size: 18px;
+					}
+				}
+			}
+			&-quest-edit-wrapper {
+				position: relative;
+				display: inline-block;
+    			width: 33%;
+				.#{$namespace} {
+					&-edit-quest-container {
+						position: absolute;
+						height: auto;
+						width: 500px;
+						right: 0;
+						top: 0;
+						left: unset;
 					}
 				}
 			}
@@ -176,11 +162,11 @@ html, body {
 				float: right;
 			}
 			&-section-row {
-				padding-bottom: 5px;
+				padding-bottom: 10px;
 			}
 		}
 	}
-	&-addQuestContainer {
+	&-quest-container {
 		height: auto;
 		.#{$namespace} {
 			&-section-header {
@@ -218,8 +204,9 @@ html, body {
 				.#{$namespace} {
 					&-cross-button {
 						position: relative;
-						top: -42px;
-						right: -25px;
+						top: -37px;
+						right: -20px;
+						color: $secondaryColor;
 					}
 				}
 			}
@@ -251,6 +238,8 @@ html, body {
 			&-option-row {
 				display: list-item;
 				margin-left: 18px;
+				font-size: $secondaryTextSize;
+				color: $primaryColor;
 				&:not(:last-child) {
 					padding-bottom: 5px;
 				}

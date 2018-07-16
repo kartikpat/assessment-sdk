@@ -3,7 +3,7 @@ var assessmentSdk = (function () {
 
 var pluginName = "my-plugin-";
 
-
+var baseUrl = "http://127.0.0.1:5000";
 
 var globalParameters = {
     questionaireId: null,
@@ -95,14 +95,17 @@ function createSlideDropDown(options) {
     return slideWrapper[0].outerHTML;
 }
 
-function createSelectDropdown(options, id) {
-    var select = createElement("select", ["select-dropdown"], id);
+function createSelectDropdown(options, classNameArr, defaultVal) {
+    var select = createElement("select", classNameArr);
     var optionRowStr = '';
     options.forEach(function (anOption) {
         var optionRow = createElement("option", ["option-row"]).attr({
             "value": anOption["value"],
             "data-label": anOption["data-label"]
         }).text(anOption["text"]);
+        if (defaultVal == parseInt(anOption["value"])) {
+            optionRow.attr("selected", "selected");
+        }
         optionRowStr += optionRow[0].outerHTML;
     });
     select.html(optionRowStr);
@@ -116,7 +119,7 @@ function toggleSlideOptions(elem) {
     });
 }
 
-function createTextarea(n, offset) {
+function createTextarea(n, offset, data) {
     if (!n) return;
 
     var j = offset || 0;
@@ -127,8 +130,11 @@ function createTextarea(n, offset) {
         var textarea = createElement("textarea", ["textarea", "small", "optionsTextarea"]).attr({
             "placeholder": "Option " + (j + 1)
         });
+        if (data.length) {
+            textarea.val(data[i]);
+        }
         j++;
-        var cancelButton = createElement("span", ["cross-button", "deleteOptionButton"]).addClass("hidden");
+        var cancelButton = createElement("span", ["cross-button", "deleteOptionButton", "icon-cross"]).addClass("hidden");
         optionsTextareaWrapper.html(textarea[0].outerHTML + cancelButton[0].outerHTML);
 
         textareaStr += optionsTextareaWrapper[0].outerHTML;
@@ -140,7 +146,7 @@ var settings = {};
 
 function initialize(data) {
     settings.addedQuestions = [];
-    if (data["questionaire"][0]) {
+    if (data["questionaire"] && data["questionaire"][0]) {
         settings.addedQuestions = data["questionaire"][0]["sections"][0]["questions"];
     }
 
@@ -148,13 +154,12 @@ function initialize(data) {
     settings.prevQuestions = data["prevQuestions"];
     settings.options = data.options;
     settings.questionTextareaVal = '';
-    settings.questTypeVal = 'multi';
     settings.questionOptionsVal = [];
 
     var wrapper = createElement("div", ["wrapper"]);
     wrapper.html(createWrapperContent());
 
-    $("#container").html(wrapper[0].outerHTML);
+    $("#" + data.options.wrapperName).html(wrapper[0].outerHTML);
 
     settings.addQuestContainer = $("#" + transformId("addQuestContainer"));
     settings.usePrevQuestContainer = $("#" + transformId("usePrevQuestContainer"));
@@ -162,14 +167,11 @@ function initialize(data) {
     settings.usePrevButton = $("#" + transformId("usePrevButton"));
     settings.addQuestButton = $("#" + transformId("addQuestButton"));
     settings.addQuestButtonModal = $("#" + transformId("addQuestButtonModal"));
-    settings.questionTextarea = $("#" + transformId("questionTextarea"));
-    settings.questionType = $("#" + transformId("questionType"));
     settings.usePrevButtonModal = $("#" + transformId("usePrevButtonModal"));
-    settings.questMandatory = $("#" + transformId("addQuestionHeader-isQuestMandatory"));
-    settings.addQuestOptionButton = $("#" + transformId("addQuestOptionButton"));
     settings.actionButtonsContainer = $("#" + transformId("actionButtonsContainer"));
+    settings.addedQuestContent = $("#" + transformId("addedQuestContent"));
 
-    settings.optionsTextarea = $("." + transformClass(["optionsTextarea"]));
+    settings.editQuestContainer = $("." + transformClass(["editQuestContainer"]));
     settings.totalQuestAdded = $("." + transformClass(["totalQuestAdded"]));
 
     settings.addQuestButton.click(function (e) {
@@ -206,21 +208,40 @@ function initialize(data) {
 
     onChangeOptionsTextarea();
 
-    onClickEditQuestion();
-
     onClickPrevQuestCheckboxModal();
+
+    onClickEditQuestion();
+}
+
+function onClickEditQuestion() {
+    settings.addedQuestContainer.on('click', '.' + transformClass(["editQuestIcon"]), function (event) {
+        event.stopPropagation();
+        $(this).next().removeClass("hidden");
+        // fn(questionId)
+    });
+}
+
+function setSortableList(fn) {
+    Sortable.create(settings.addedQuestContent[0], {
+        handle: '.' + transformClass(["sort-icon"]),
+        animation: 150,
+        ghostClass: transformClass(["ghost"]),
+        // Element dragging ended
+        onEnd: function onEnd(evt) {
+            var questionIds = [];
+            $.each(settings.addedQuestContent.find("." + transformClass(["section-row"])), function (index, sectionRow) {
+                questionIds.push($(sectionRow).attr("data-questionId"));
+            });
+            fn(questionIds);
+        }
+    });
 }
 
 function onClickDeleteQuestion(fn) {
     settings.addedQuestContainer.on('click', '.' + transformClass(["deleteQuestIcon"]), function () {
-        debugger;
         var questionId = $(this).closest("." + transformClass(["section-row"])).attr("data-questionId");
         fn(questionId);
     });
-}
-
-function onClickEditQuestion() {
-    settings.addedQuestContainer.on('click', '.' + transformClass(["editQuestIcon"]), function () {});
 }
 
 function onChangeOptionsTextarea() {
@@ -229,14 +250,41 @@ function onChangeOptionsTextarea() {
         $.each(settings.addQuestContainer.find("." + transformClass(["optionsTextarea"])).slice(0, 2), function (index, anOption) {
             settings.questionOptionsVal.push($(anOption).val().trim());
         });
-        validateAddQuestData(settings.questTypeVal);
+        var questTypeVal = settings.addQuestContainer.find("." + transformClass(["questionType"])).find("option:selected").attr("data-label") || '';
+        if (validateAddQuestData(questTypeVal)) {
+            return settings.addQuestButtonModal.prop("disabled", false).removeClass(transformClass(["disabled"]));
+        }
+        return settings.addQuestButtonModal.prop("disabled", true).addClass(transformClass(["disabled"]));
+    });
+    settings.editQuestContainer.on('keyup', "." + transformClass(["optionsTextarea"]), function () {
+        settings.questionOptionsVal = [];
+        $.each(settings.editQuestContainer.find("." + transformClass(["optionsTextarea"])).slice(0, 2), function (index, anOption) {
+            settings.questionOptionsVal.push($(anOption).val().trim());
+        });
+        var questTypeVal = settings.editQuestContainer.find("." + transformClass(["questionType"])).find("option:selected").attr("data-label") || '';
+        if (validateAddQuestData(questTypeVal)) {
+            return $(this).closest("." + transformClass(["editQuestContainer"])).find("." + transformClass(["editQuestButtonModal"])).prop("disabled", false).removeClass(transformClass(["disabled"]));
+        }
+        return $(this).closest("." + transformClass(["editQuestContainer"])).find("." + transformClass(["editQuestButtonModal"])).prop("disabled", true).addClass(transformClass(["disabled"]));
     });
 }
 
 function onChangeQuestTextarea() {
-    settings.addQuestContainer.on('keyup', "#" + transformId("questionTextarea"), function () {
+    settings.addQuestContainer.on('keyup', "." + transformClass(["questionTextarea"]), function () {
         settings.questionTextareaVal = $(this).val().trim();
-        validateAddQuestData(settings.questTypeVal);
+        var questTypeVal = settings.addQuestContainer.find("." + transformClass(["questionType"])).find("option:selected").attr("data-label") || '';
+        if (validateAddQuestData(questTypeVal)) {
+            return settings.addQuestButtonModal.prop("disabled", false).removeClass(transformClass(["disabled"]));
+        }
+        return settings.addQuestButtonModal.prop("disabled", true).addClass(transformClass(["disabled"]));
+    });
+    settings.editQuestContainer.on('keyup', "." + transformClass(["questionTextarea"]), function () {
+        settings.questionTextareaVal = $(this).val().trim();
+        var questTypeVal = settings.editQuestContainer.find("." + transformClass(["questionType"])).find("option:selected").attr("data-label") || '';
+        if (validateAddQuestData(questTypeVal)) {
+            return $(this).closest("." + transformClass(["editQuestContainer"])).find("." + transformClass(["editQuestButtonModal"])).prop("disabled", false).removeClass(transformClass(["disabled"]));
+        }
+        return $(this).closest("." + transformClass(["editQuestContainer"])).find("." + transformClass(["editQuestButtonModal"])).prop("disabled", true).addClass(transformClass(["disabled"]));
     });
 }
 
@@ -259,46 +307,74 @@ function validateAddQuestData(questionType) {
     }
 
     if (flag == 1) {
-        return settings.addQuestButtonModal.prop("disabled", false).removeClass(transformClass(["disabled"]));
+        return true;
     }
 
-    return settings.addQuestButtonModal.prop("disabled", true).addClass(transformClass(["disabled"]));
+    return false;
 }
 
 function onClickDeleteQuestOption() {
     settings.addQuestContainer.on('click', "." + transformClass(["deleteOptionButton"]), function (e) {
         $(this).parent().remove();
-        var optionsLength = settings.addQuestContainer.find(".my-plugin-optionsTextarea").length;
+        var optionsLength = settings.addQuestContainer.find("." + transformClass(["optionsTextarea"])).length;
         if (optionsLength <= 2) {
             settings.addQuestContainer.find('.' + transformClass(["deleteOptionButton"])).addClass("hidden");
+        }
+    });
+    settings.editQuestContainer.on('click', "." + transformClass(["deleteOptionButton"]), function (e) {
+        $(this).parent().remove();
+        var optionsLength = $(this).closest("." + transformClass(["editQuestContainer"])).find("." + transformClass(["optionsTextarea"])).length;
+        if (optionsLength <= 2) {
+            $(this).closest("." + transformClass(["editQuestContainer"])).find('.' + transformClass(["deleteOptionButton"])).addClass("hidden");
         }
     });
 }
 
 function onChangeQuestType() {
-    settings.questionType.change(function (e) {
-        settings.questTypeVal = $(this).find('option:selected').attr("data-label") || '';
-        settings.addQuestContainer.find("." + transformClass(["section-content"])).html(createAddQuestSectionContent(settings.questTypeVal));
-        settings.addQuestButtonModal.addClass(transformClass(["disabled"]));
+    settings.addQuestContainer.on('change', "." + transformClass(["questionType"]), function (e) {
+        var questTypeVal = $(this).find('option:selected').attr("data-label") || '';
+        settings.addQuestContainer.find("." + transformClass(["section-content"])).html(createAddQuestSectionContent(questTypeVal));
+        settings.addQuestButtonModal.prop("disabled", true).addClass(transformClass(["disabled"]));
         settings.questionTextareaVal = '';
         settings.questionOptionsVal = [];
-        settings.questMandatory.prop("checked", false);
+    });
+    settings.editQuestContainer.on('change', "." + transformClass(["questionType"]), function (e) {
+        // settings.questTypeVal = $(this).find('option:selected').attr("data-label") || '';
+        // settings.addQuestContainer.find("." + transformClass(["section-content"])).html(createAddQuestSectionContent(settings.questTypeVal))
+        // settings.addQuestButtonModal.addClass(transformClass(["disabled"]))
+        // settings.questionTextareaVal = ''
+        // settings.questionOptionsVal = []
+        // settings.questMandatory.prop("checked", false)
     });
 }
 
 function closeContainer() {
     $("." + transformClass(["container"])).addClass("hidden");
-    settings.addQuestContainer.find("textarea").val('');
-    settings.usePrevQuestContainer.find('.' + transformClass(["checkbox-input"])).prop('checked', false);
-    settings.usePrevQuestContainer.find('.' + transformClass(["checkbox-input"])).prop('disabled', false);
+    settings.addQuestContainer.find("." + transformClass(["questionTextarea"])).val('');
+    settings.usePrevQuestContainer.find('.' + transformClass(["checkbox-input"])).prop({
+        'checked': false,
+        'disabled': false
+    });
     settings.addQuestButtonModal.addClass(transformClass(["disabled"]));
+    settings.totalQuestAddedCount = globalParameters.questionIds.length;
+    settings.usePrevQuestContainer.find('.' + transformClass(["totalQuestAdded"])).text("Questions added: " + settings.totalQuestAddedCount + "/10");
+    settings.questionTextareaVal = '';
+    settings.questionOptionsVal = [];
 }
 
 function onClickAddQuestOption() {
-    settings.addQuestOptionButton.click(function (e) {
+    settings.addQuestContainer.on('click', "." + transformClass(["addQuestOptionButton"]), function (e) {
         e.stopPropagation();
-        var optionsLength = settings.addQuestContainer.find(".my-plugin-optionsTextarea").length;
-        settings.addQuestContainer.find("." + transformClass(["options-wrapper"])).append(createTextarea(1, optionsLength));
+        var optionsLength = settings.addQuestContainer.find("." + transformClass(["optionsTextarea"])).length;
+        settings.addQuestContainer.find("." + transformClass(["options-wrapper"])).append(createTextarea(1, optionsLength, []));
+        if (optionsLength >= 2) {
+            settings.addQuestContainer.find('.' + transformClass(["deleteOptionButton"])).removeClass("hidden");
+        }
+    });
+    settings.editQuestContainer.on('click', "." + transformClass(["addQuestOptionButton"]), function (e) {
+        e.stopPropagation();
+        var optionsLength = settings.editQuestContainer.find("." + transformClass(["optionsTextarea"])).length;
+        settings.editQuestContainer.find("." + transformClass(["options-wrapper"])).append(createTextarea(1, optionsLength, []));
         if (optionsLength >= 2) {
             settings.addQuestContainer.find('.' + transformClass(["deleteOptionButton"])).removeClass("hidden");
         }
@@ -317,16 +393,45 @@ function onClickAddQuestion(fn) {
         e.stopPropagation();
 
         var data = {};
-        data["question"] = $($("#" + transformId("questionTextarea"))[0]).val().trim();
-        data["type"] = parseInt(settings.questionType.val());
+        data["question"] = settings.addQuestContainer.find("." + transformClass(["questionTextarea"])).val().trim();
+
+        data["type"] = parseInt(settings.addQuestContainer.find("." + transformClass(["questionType"])).val());
         var ansOptions = [];
 
         $.each(settings.addQuestContainer.find("." + transformClass(["optionsTextarea"])), function (index, anOption) {
-            ansOptions.push($(anOption).val());
+            ansOptions.push($(anOption).val().trim());
         });
-        data["answerOptions"] = ansOptions;
+        if (ansOptions.length) {
+            data["answerOptions"] = ansOptions;
+        }
         data["author"] = settings.options.author;
-        data["mandatory"] = settings.questMandatory.is(":checked");
+        data["mandatory"] = settings.addQuestContainer.find("." + transformClass(["checkbox-input"])).is(":checked");
+        return console.log(data);
+        fn(data);
+    });
+}
+
+function onClickEditQuestionModal(fn) {
+    settings.addedQuestContainer.on('click', '.' + transformClass(["editQuestButtonModal"]), function (e) {
+        e.stopPropagation();
+        var data = {};
+        var elem = $(this).closest("." + transformClass(["editQuestContainer"]));
+        data["question"] = elem.find("." + transformClass(["questionTextarea"])).val().trim();
+
+        data["type"] = parseInt(elem.find("." + transformClass(["questionType"])).val());
+        var ansOptions = [];
+
+        $.each(elem.find("." + transformClass(["optionsTextarea"])), function (index, anOption) {
+            ansOptions.push($(anOption).val().trim());
+        });
+        if (ansOptions.length) {
+            data["answerOptions"] = ansOptions;
+        }
+        data["author"] = settings.options.author;
+        data["mandatory"] = elem.find("." + transformClass(["checkbox-input"])).is(":checked");
+        return console.log(data);
+        var questionId = elem.attr("data-questionId");
+        console.log(questionId);
         fn(data);
     });
 }
@@ -362,7 +467,7 @@ function createMainContainer() {
     var actionButtonsCont = createElement("div", ["action-button-container"], "actionButtonsContainer");
     var addQuestButton = createElement("button", ["button"], "addQuestButton").text("Add Question");
 
-    var addQuestContainer = createElement("div", ["container", "addQuestContainer"], "addQuestContainer").addClass("hidden");
+    var addQuestContainer = createElement("div", ["container", "quest-container", "addQuestContainer"], "addQuestContainer").addClass("hidden");
     addQuestContainer.html(createAddQuestContainer());
 
     var actionButtonsContStr = addQuestButton[0].outerHTML + addQuestContainer[0].outerHTML;
@@ -391,7 +496,6 @@ function createMainContainer() {
 }
 
 function createAddedQuestContainer() {
-
     var heading = createElement("div", ["section-heading", "totalQuestAdded"]).text("Your Added Questions (" + settings.totalQuestAddedCount + "/10)");
     var questionsContent = createElement("div", ["section-content"], "addedQuestContent");
 
@@ -413,7 +517,7 @@ function createAddedQuestionsContent(data) {
 function createAddedQuestRow(data) {
     var row = createElement("div", ["section-row"]).attr("data-questionId", data["id"]);
 
-    var sortIcon = createElement("div", ["sort-icon"]);
+    var sortIcon = createElement("div", ["sort-icon", "icon-asterisk"]);
 
     var questionWrapper = createElement("div", ["added-question-wrapper"]);
     var questionText = createElement("div", ["question-text"]).text(data["question"]);
@@ -430,15 +534,21 @@ function createAddedQuestRow(data) {
     questionWrapper.html(questionWrapperStr);
 
     var questionActions = createElement("div", ["question-actions-container"]);
-    var mandatoryIcon = createElement("div", ["question-action-icon", "mandatory-icon"]);
-    var editIcon = createElement("div", ["question-action-icon", "edit-icon", "editQuestIcon"]);
-    var deleteIcon = createElement("div", ["question-action-icon", "delete-icon", "deleteQuestIcon"]);
+    var mandatoryIcon = createElement("div", ["question-action-icon", "mandatory-icon", "icon-asterisk"]);
+
+    var editWrapper = createElement("div", ["quest-edit-wrapper"]);
+    var editIcon = createElement("div", ["question-action-icon", "edit-icon", "editQuestIcon", "icon-edit"]);
+    var editQuestContainer = createElement("div", ["container", "quest-container", "edit-quest-container", "editQuestContainer"]).addClass("hidden").attr("data-questionId", data["id"]);
+    editQuestContainer.html(createEditQuestContainer(data));
+    editWrapper.html(editIcon[0].outerHTML + editQuestContainer[0].outerHTML);
+
+    var deleteIcon = createElement("div", ["question-action-icon", "delete-icon", "deleteQuestIcon", "icon-delete"]);
 
     if (data["mandatory"] == false) {
         mandatoryIcon.addClass("hidden");
     }
 
-    questionActions.html(mandatoryIcon[0].outerHTML + editIcon[0].outerHTML + deleteIcon[0].outerHTML);
+    questionActions.html(mandatoryIcon[0].outerHTML + editWrapper[0].outerHTML + deleteIcon[0].outerHTML);
 
     row.html(sortIcon[0].outerHTML + questionWrapper[0].outerHTML + questionActions[0].outerHTML);
 
@@ -452,11 +562,12 @@ function appendQuestionsAdded(data) {
 
 function createAddQuestContainer() {
     var sectionHeader = createElement("div", ["section-header"]);
-    var selectDropdown = createSelectDropdown(questionTypeOptions, "questionType");
+    var selectDropdown = createSelectDropdown(questionTypeOptions, ["select-dropdown", "questionType"]);
     var checkbox = createCheckbox(transformId("addQuestionHeader-isQuestMandatory"), null, null, null, "Mandatory");
     sectionHeader.html(selectDropdown + checkbox);
     var sectionContent = createElement("div", ["section-content"]);
-    sectionContent.html(createAddQuestSectionContent(settings.questTypeVal));
+
+    sectionContent.html(createAddQuestSectionContent("multi"));
 
     var sectionFooter = createElement("div", ["section-footer"]);
     var addButton = createElement("button", ["button"], "addQuestButtonModal").prop({
@@ -468,14 +579,36 @@ function createAddQuestContainer() {
     return sectionHeader[0].outerHTML + sectionContent[0].outerHTML + sectionFooter[0].outerHTML;
 }
 
+function createEditQuestContainer(data) {
+    var sectionHeader = createElement("div", ["section-header"]);
+    var selectDropdown = createSelectDropdown(questionTypeOptions, ["select-dropdown", "questionType"], parseInt(data["type"]));
+    // var questTypeVal = $(selectDropdown).find("option:selected").attr("data-label")
+    debugger;
+    var checkbox = createCheckbox(transformId("editQuestionHeader-isQuestMandatory-" + data["id"] + ""), null, null, null, "Mandatory");
+    if (data["mandatory"]) {
+        checkbox.prop("checked", true);
+    }
+    sectionHeader.html(selectDropdown + checkbox);
+    var sectionContent = createElement("div", ["section-content"]);
+
+    sectionContent.html(createEditQuestSectionContent(data, "multi"));
+
+    var sectionFooter = createElement("div", ["section-footer"]);
+    var addButton = createElement("button", ["button", "editQuestButtonModal"]).text("Save");
+    var cancelButton = createElement("button", ["button", "borderLess-button", "cancel-container-button"]).text("Cancel");
+    sectionFooter.html(addButton[0].outerHTML + cancelButton[0].outerHTML);
+
+    return sectionHeader[0].outerHTML + sectionContent[0].outerHTML + sectionFooter[0].outerHTML;
+}
+
 function createUsePrevQuestContainer(data) {
     var sectionHeading = createElement("div", ["section-heading"]).text("Use previously added question");
     var sectionContent = createElement("div", ["section-content"]);
     sectionContent.html(createUsePrevQuestSectionContent(data));
     var sectionFooter = createElement("div", ["section-footer"]);
-    var addButton = createElement("button", ["button"], "usePrevButtonModal").text("Add selected questions");
+    var addButton = createElement("button", ["button", "disabled"], "usePrevButtonModal").text("Add selected questions").prop("disabled", true);
     var cancelButton = createElement("button", ["button", "borderLess-button",, "cancel-container-button"]).text("Cancel");
-    var totalQuestionsAdded = createElement("div", ["quest-added-text", "totalQuestAdded"]).text("Questions added: " + settings.totalQuestAddedCount + "/10");
+    var totalQuestionsAdded = createElement("div", ["quest-added-text", "totalQuestAdded"]).text("Your Added Questions: " + settings.totalQuestAddedCount + "/10");
     sectionFooter.html(addButton[0].outerHTML + cancelButton[0].outerHTML + totalQuestionsAdded[0].outerHTML);
 
     return sectionHeading[0].outerHTML + sectionContent[0].outerHTML + sectionFooter[0].outerHTML;
@@ -484,7 +617,7 @@ function createUsePrevQuestContainer(data) {
 function createUsePrevQuestSectionContent(data) {
     var sectionRowStr = '';
     data.forEach(function (aPrevQuestion) {
-        var sectionRow = createElement("div", ["section-row"]);
+        var sectionRow = createElement("div", ["section-row"]).attr("data-questionId", aPrevQuestion["id"]);
         var checkbox = createCheckbox("addQuestSectionRow" + aPrevQuestion["id"], null, aPrevQuestion["id"], null, aPrevQuestion["question"]);
         var questionWrapperStr = '';
 
@@ -501,14 +634,32 @@ function createUsePrevQuestSectionContent(data) {
     return sectionRowStr;
 }
 
-function createAddQuestSectionContent(questionType) {
+function createEditQuestSectionContent(data, questionType) {
     var questionText = createElement("div", ["text"]).text("Question Text*");
-    var questionTextarea = createElement("textarea", ["textarea"], "questionTextarea").attr({ "placeholder": "What would you like to ask?" });
+    var questionTextarea = createElement("textarea", ["textarea", "questionTextarea"]).attr({ "placeholder": "What would you like to ask?" });
+    questionTextarea.val(data["question"]);
 
     if (["multi", "single"].indexOf(questionType) != -1) {
         var optionsWrapper = createElement("div", ["options-wrapper"]);
-        var optionTextArea = createTextarea(2, 0);
-        var addOptionButton = createElement("button", ["button", "borderLess-button", "add-quest-option"], "addQuestOptionButton").text("Add Option");
+        if (data["answerOptions"]) {
+            var optionTextArea = createTextarea(data["answerOptions"].length, 0, data["answerOptions"]);
+        }
+        var addOptionButton = createElement("button", ["button", "borderLess-button", "add-quest-option", "addQuestOptionButton"]).text("Add Option");
+        optionsWrapper.html(optionTextArea);
+        return questionText[0].outerHTML + questionTextarea[0].outerHTML + optionsWrapper[0].outerHTML + addOptionButton[0].outerHTML;
+    }
+
+    return questionText[0].outerHTML + questionTextarea[0].outerHTML;
+}
+
+function createAddQuestSectionContent(questionType) {
+    var questionText = createElement("div", ["text"]).text("Question Text*");
+    var questionTextarea = createElement("textarea", ["textarea", "questionTextarea"]).attr({ "placeholder": "What would you like to ask?" });
+
+    if (["multi", "single"].indexOf(questionType) != -1) {
+        var optionsWrapper = createElement("div", ["options-wrapper"]);
+        var optionTextArea = createTextarea(2, 0, []);
+        var addOptionButton = createElement("button", ["button", "borderLess-button", "add-quest-option", "addQuestOptionButton"]).text("Add Option");
         optionsWrapper.html(optionTextArea);
         return questionText[0].outerHTML + questionTextarea[0].outerHTML + optionsWrapper[0].outerHTML + addOptionButton[0].outerHTML;
     }
@@ -520,16 +671,23 @@ function onClickPrevQuestCheckboxModal() {
     settings.usePrevQuestContainer.on('click', '.' + transformClass(["checkbox-input"]), function (event) {
         event.stopPropagation();
         if ($(this).is(":checked")) {
+            settings.usePrevButtonModal.prop("disabled", false).removeClass(transformClass(["disabled"]));
             settings.totalQuestAddedCount += 1;
             if (settings.totalQuestAddedCount == 10) {
                 settings.usePrevQuestContainer.find('.' + transformClass(["checkbox-input"])).attr("disabled", true);
                 settings.usePrevQuestContainer.find('.' + transformClass(["checkbox-input"]) + ':checked').attr("disabled", false);
             }
         } else {
+            var checkedQuestLength = settings.usePrevQuestContainer.find('.' + transformClass(["checkbox-input"]) + ':checked').length;
+            if (checkedQuestLength > 0) {
+                settings.usePrevButtonModal.prop("disabled", false).removeClass(transformClass(["disabled"]));
+            } else {
+                settings.usePrevButtonModal.prop("disabled", true).addClass(transformClass(["disabled"]));
+            }
             settings.totalQuestAddedCount -= 1;
             settings.usePrevQuestContainer.find('.' + transformClass(["checkbox-input"])).attr("disabled", false);
         }
-        settings.usePrevQuestContainer.find('.' + transformClass(["totalQuestAdded"])).text("Questions added: " + settings.totalQuestAddedCount + "/10");
+        settings.usePrevQuestContainer.find('.' + transformClass(["totalQuestAdded"])).text("Your Added Questions: " + settings.totalQuestAddedCount + "/10");
     });
     settings.usePrevQuestContainer.on('click', '.' + transformClass(["checkbox-label"]), function (event) {
         event.stopPropagation();
@@ -538,6 +696,10 @@ function onClickPrevQuestCheckboxModal() {
 
 function deleteAddedQuestionRow(id) {
     settings.addedQuestContainer.find("." + transformClass(["section-row"]) + "[data-questionId=" + id + "]").remove();
+}
+
+function deletePrevUsedQuestionRow(id) {
+    settings.usePrevQuestContainer.find("." + transformClass(["section-row"]) + "[data-questionId=" + id + "]").remove();
 }
 
 function showActionButtonContainer() {
@@ -549,12 +711,17 @@ function hideActionButtonContainer() {
 }
 
 function updateTotalQuestionsAddedText(data) {
-    settings.totalQuestAdded.text("Questions added: " + data + "/10");
+    settings.totalQuestAdded.text("Your Added Questions: " + data + "/10");
     settings.totalQuestAddedCount = data;
 }
 
 function hideAddedQuestionContainer() {
     settings.addedQuestContainer.addClass("hidden");
+}
+
+function hideUsePrevButton() {
+    settings.usePrevButton.addClass("hidden");
+    settings.actionButtonsContainer.find("." + transformClass(["or-text"])).addClass("hidden");
 }
 //
 // export function updateTotalQuestionsAddedText()
@@ -630,13 +797,31 @@ function Assessment(config) {
         options = extendDefaults(defaults, config);
     }
 
+    var questionsParameters = {
+        "author": options.author
+    };
+
+    if (!options.association) {
+        $.when(null, fetchQuestions(questionsParameters)).then(function (a, b) {
+            if (b[0] && b[0]["status"] == "success") {
+
+                var questionRows = b[0]['data'];
+
+                var data = {
+                    "prevQuestions": questionRows,
+                    "options": options
+                };
+                return pubsub.publish("fetchedQuestionaireDetails", data);
+            }
+        }, function (res, status, error) {
+            return pubsub.publish("failedToFetchQuestionaireDetails", res);
+        });
+        return;
+    }
+
     var questionaireParameters = {
         "association": options.association,
         "invocation": questionaireInvocation["screening"]
-    };
-
-    var questionsParameters = {
-        "author": options.author
     };
 
     $.when(fetchQuestionaire(questionaireParameters), fetchQuestions(questionsParameters)).then(function (a, b) {
@@ -658,7 +843,11 @@ function Assessment(config) {
 }
 
 function onSuccessfullFetchedQuestionaireDetails(topic, data) {
-    if (data.questionaire.length) {
+    if (data.options) {
+        globalParameters.options = data.options;
+    }
+
+    if (data.questionaire && data.questionaire.length) {
         globalParameters.questionaireId = data.questionaire[0]["id"];
         data.questionaire[0]["sections"][0]["questions"].forEach(function (aQuestion) {
             globalParameters.questionIds.push(aQuestion["id"]);
@@ -666,21 +855,53 @@ function onSuccessfullFetchedQuestionaireDetails(topic, data) {
     }
 
     if (data.prevQuestions.length) {
+        var prevQuestions = [];
         data.prevQuestions.forEach(function (aPrevQuestion) {
-            globalParameters.prevQuestions[aPrevQuestion["id"]] = aPrevQuestion;
+            var index = globalParameters["questionIds"].indexOf(aPrevQuestion["id"]);
+            if (index == -1) {
+                prevQuestions.push(aPrevQuestion);
+                globalParameters.prevQuestions[aPrevQuestion["id"]] = aPrevQuestion;
+            }
         });
+        data.prevQuestions = prevQuestions;
     }
 
     initialize(data);
 
-    // model.onClick
+    setSortableList(function (questionIds) {
+        var data = {};
+        data["questionIds"] = questionIds;
+
+        var extraParameters = {};
+        extraParameters.questionIds = questionIds;
+        extraParameters.origin = "sortable";
+        associateQuestionWithQuestionaire(globalParameters.questionaireId, 0, data, extraParameters);
+    });
 
     onClickUsePrevButtonModal(function (prevQuestionIds) {
         var data = {};
         data["questionIds"] = globalParameters.questionIds.concat(prevQuestionIds);
+
         var extraParameters = {};
         extraParameters.prevQuestionIds = prevQuestionIds;
         extraParameters.origin = "prevUsed";
+        extraParameters.data = data;
+
+        if (!globalParameters.questionaireId) {
+            var questionaireData = {
+                "author": globalParameters.options.author,
+                "tags": globalParameters.options.tags,
+                "authorType": globalParameters.options.authorType,
+                "invocation": questionaireInvocation["screening"],
+                "association": globalParameters.options.association,
+                "sections": [{
+                    "type": "static",
+                    "questionIds": []
+                }]
+            };
+            return createQuestionaire(questionaireData, extraParameters);
+        }
+
         associateQuestionWithQuestionaire(globalParameters.questionaireId, 0, data, extraParameters);
     });
 
@@ -690,11 +911,11 @@ function onSuccessfullFetchedQuestionaireDetails(topic, data) {
 
         if (!globalParameters.questionaireId) {
             var questionaireData = {
-                "author": data.options.author,
-                "tags": data.options.tags,
-                "authorType": data.options.authorType,
+                "author": globalParameters.options.author,
+                "tags": globalParameters.options.tags,
+                "authorType": globalParameters.options.authorType,
                 "invocation": questionaireInvocation["screening"],
-                "association": data.options.association,
+                "association": globalParameters.options.association,
                 "sections": [{
                     "type": "static",
                     "questionIds": []
@@ -707,7 +928,6 @@ function onSuccessfullFetchedQuestionaireDetails(topic, data) {
     });
 
     onClickDeleteQuestion(function (id) {
-        debugger;
         var data = {};
         data["questionIds"] = globalParameters.questionIds;
         var index = data["questionIds"].indexOf(id);
@@ -719,6 +939,10 @@ function onSuccessfullFetchedQuestionaireDetails(topic, data) {
         extraParameters.questionId = id;
         associateQuestionWithQuestionaire(globalParameters.questionaireId, 0, data, extraParameters);
     });
+
+    onClickEditQuestionModal(function (id) {
+        return;
+    });
 }
 
 function onFailFetchedQuestionaireDetails(topic, data) {}
@@ -729,6 +953,13 @@ var fetchedQuestionaireDetailsFailSubscription = pubsub.subscribe("failedToFetch
 function onSuccessfullCreateQuestionaire(topic, res) {
     globalParameters.questionaireId = res.data;
     var extraParameters = {};
+    if (res.extraParameters.origin == "prevUsed") {
+        var data = res.extraParameters.data;
+        extraParameters.prevQuestionIds = res.extraParameters.prevQuestionIds;
+        extraParameters.origin = "prevUsed";
+        return associateQuestionWithQuestionaire(globalParameters.questionaireId, 0, data, extraParameters);
+    }
+
     extraParameters.questionData = res.extraParameters.questionData;
     createQuestion(res.extraParameters.questionData, extraParameters);
 }
@@ -772,17 +1003,28 @@ function onSuccessfullAssociateQuestionWithQuestionaire(topic, res) {
         return deleteAddedQuestionRow(res.extraParameters.questionId);
     }
 
+    if (res.extraParameters.origin == "sortable") {
+        return alert("successfully sorted");
+    }
+
     var questionsToAppend = [];
     if (res.extraParameters.origin == "prevUsed") {
         globalParameters.questionIds = globalParameters.questionIds.concat(res.extraParameters.prevQuestionIds);
         res.extraParameters.prevQuestionIds.forEach(function (aPrevQuestionId) {
             questionsToAppend.push(globalParameters.prevQuestions[aPrevQuestionId]);
+            deletePrevUsedQuestionRow(aPrevQuestionId);
+            delete globalParameters.prevQuestions[aPrevQuestionId];
         });
+
+        if (Object.keys(globalParameters.prevQuestions).length === 0 && globalParameters.prevQuestions.constructor === Object) {
+            hideUsePrevButton();
+        }
     }
     if (res.extraParameters.origin == "newlyAdded") {
         globalParameters.questionIds = globalParameters.questionIds.concat(res.extraParameters.questionId);
         questionsToAppend.push(res.extraParameters.questionData);
     }
+
     updateTotalQuestionsAddedText(globalParameters.questionIds.length);
     appendQuestionsAdded(questionsToAppend);
     if (globalParameters.questionIds.length >= 10) {

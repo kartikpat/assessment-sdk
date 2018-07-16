@@ -1,5 +1,5 @@
 {
-	"withDependencies": {
+	"testing": {
 		"styles": {
 			"debug" : [
             	"static/css/index.css"
@@ -17,6 +17,27 @@
 				"static/js/main.js"
 			],
 			"prod" : [
+				"build/js/assessment-testing.min.js"
+			]
+		}
+	},
+	"withDependencies": {
+		"styles": {
+			"debug" : [
+            	"static/css/index.css"
+			],
+			"prod": [
+				"build/css/assessment.min.css"
+			]
+		},
+		"scripts": {
+			"debug": [
+				"static/js/vendor/jquery.min.js",
+				"static/js/utilities/request.js",
+				"static/js/utilities/pubsub.js",
+				"bundle/bundle.js"
+			],
+			"prod" : [
 				"build/js/assessment-withDependencies.min.js"
 			]
 		}
@@ -32,8 +53,7 @@
 		},
 		"scripts": {
 			"debug": [
-				"bundle/bundle.js",
-				"static/js/main.js"
+				"bundle/bundle.js"
 			],
 			"prod" : [
 				"build/js/assessment-withoutDependencies.min.js"

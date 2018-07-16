@@ -28,8 +28,8 @@ module.exports = function(settings){
 	app.get("/", isAuthenticated,function(req, res) {
 		res.render("index", {
 			title: "",
-			styles:  assetsMapper["withDependencies"]["styles"][mode],
-			scripts: assetsMapper["withDependencies"]["scripts"][mode],
+			styles:  assetsMapper["testing"]["styles"][mode],
+			scripts: assetsMapper["testing"]["scripts"][mode],
 			baseUrl: baseUrl
 		});
 	});

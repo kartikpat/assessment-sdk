@@ -1,13 +1,15 @@
 @import "type";
 @import "colors";
 
-$namespace: 'my-plugin';
-
 .hidden {
     display: none !important;
 }
 
 .#{$namespace} {
+    &-ghost {
+        opacity: .5;
+        background: transparent;
+    }
     &-primary-text {
         font-size: $primaryTextSize;
         color: $primaryColor;
@@ -21,6 +23,8 @@ $namespace: 'my-plugin';
     		cursor:pointer;
             font-size: $primaryTextSize;
             color: $primaryColor;
+            line-height: 1.4;
+            word-wrap: break-word;
     	}
     	input+label {
     		padding:5px 0 4px 35px;
@@ -67,6 +71,7 @@ $namespace: 'my-plugin';
         line-height: 1.5;
         overflow-y: hidden;
         outline: none;
+        resize: none;
         &.#{$namespace} {
             &-small {
                 min-height: 50px;
@@ -76,4 +81,34 @@ $namespace: 'my-plugin';
             }
         }
     }
+    &-button {
+		-webkit-appearance: none;
+	    -moz-appearance: none;
+	    -ms-appearance: none;
+	    -o-appearance: none;
+		border: 1px solid $buttonBorder;
+		color: $primaryColor;
+	    margin: 0;
+	    background: $white;
+	    font-size: 14px;
+	    display: inline-block;
+	    vertical-align: top;
+	    cursor: pointer;
+	    padding: 7px 14px;
+		border-radius: 4px;
+		outline: none;
+		&.#{$namespace} {
+            &-disabled {
+				border-color: $borderColorLight;
+				background-color: $disabledBackgroundColor;
+				color: $disabledTextColor;
+            }
+        }
+	}
+	&-borderLess-button {
+		color: $linkColor;
+		box-shadow: none;
+		border: 0;
+		background: none;
+	}
 }

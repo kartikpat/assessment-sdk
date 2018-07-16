@@ -61,14 +61,17 @@ export function createSlideDropDown(options) {
     return slideWrapper[0].outerHTML
 }
 
-export function createSelectDropdown(options, id) {
-    var select = createElement("select", ["select-dropdown"],id);
+export function createSelectDropdown(options, classNameArr, defaultVal) {
+    var select = createElement("select", classNameArr);
     var optionRowStr = ''
     options.forEach(function(anOption) {
         var optionRow = createElement("option", ["option-row"]).attr({
             "value": anOption["value"],
             "data-label": anOption["data-label"]
-        }).text(anOption["text"])
+        }).text(anOption["text"]);
+        if(defaultVal == parseInt(anOption["value"])) {
+            optionRow.attr("selected", "selected");
+        }
         optionRowStr += optionRow[0].outerHTML
     });
     select.html(optionRowStr)
@@ -84,7 +87,7 @@ export function toggleSlideOptions(elem) {
 
 
 
-export function createTextarea(n, offset) {
+export function createTextarea(n, offset, data) {
     if (!n)
         return
 
@@ -96,8 +99,11 @@ export function createTextarea(n, offset) {
         var textarea = createElement("textarea", ["textarea", "small", "optionsTextarea"]).attr({
             "placeholder": "Option " + (j + 1)
         });
+        if(data.length) {
+            textarea.val(data[i])
+        }
         j++;
-        var cancelButton = createElement("span", ["cross-button", "deleteOptionButton"]).addClass("hidden")
+        var cancelButton = createElement("span", ["cross-button", "deleteOptionButton", "icon-cross"]).addClass("hidden")
         optionsTextareaWrapper.html(textarea[0].outerHTML + cancelButton[0].outerHTML)
 
         textareaStr += optionsTextareaWrapper[0].outerHTML
