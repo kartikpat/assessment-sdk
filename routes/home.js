@@ -25,11 +25,11 @@ module.exports = function(settings){
     	res.redirect('/sign-in');
 	}
 
-	app.get("/", isAuthenticated,function(req, res){
+	app.get("/", isAuthenticated,function(req, res) {
 		res.render("index", {
 			title: "",
-			styles:  assetsMapper["index"]["styles"][mode],
-			scripts: assetsMapper["index"]["scripts"][mode],
+			styles:  assetsMapper["testing"]["styles"][mode],
+			scripts: assetsMapper["testing"]["scripts"][mode],
 			baseUrl: baseUrl
 		});
 	});

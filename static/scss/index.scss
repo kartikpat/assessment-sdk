@@ -1,20 +1,249 @@
-body, html{
+@import 'global/globals';
+
+* {
+	box-sizing: border-box;
+}
+
+html, body {
+	height: 100%;
 	margin: 0;
-	padding: 20px;
-	background-color: black;
+	padding: 0;
 }
 
-.main-content{
-	height: 400px;
-	width: 400px;
-}
+.#{$namespace} {
+	&-wrapper {
+		padding: 20px;
+		font-family: $primaryFont;
+	}
+	&-heading {
+		color: $primaryColor;
+		font-size: $primaryTextSize;
+	}
+	&-sub-heading {
+		color: $secondaryColor;
+		padding: 5px 0 15px 0;
+		font-size: $secondaryTextSize;
+	}
+	&-action-button-container {
+		line-height: 32px;
+		.#{$namespace} {
+			&-or-text {
+				display: inline-block;
+				width: 50px;
+				text-align: center;
+				text-transform: uppercase;
+				font-size: $secondaryTextSize;
+				color: $secondaryColor;
+			}
+		}
+	}
+	&-container {
+		position: relative;
+		top: -32px;
+		left: 0;
+		box-shadow: 3px 3px 12.74px 1.26px rgba(0, 0, 0, 0.16);
+		border: 1px solid $borderColor;
+		border-radius: 4px;
+		overflow: hidden;
+		z-index: 1;
+		height: 500px;
+		width: 100%;
+		max-width: 650px;
+		background-color: $white;
 
-.center-block{
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	-webkit-transform: translate(-50%, -50%);
-	-moz-transform: translate(-50%, -50%);
-	background: white;
+	}
+	&-cross-button {
+		cursor: pointer;
+	}
+	&-sort-icon {
+		cursor: move;
+		cursor: -webkit-grabbing;
+	}
+	&-mandatory-icon {
+
+	}
+	&-edit-icon {
+		cursor: pointer;
+	}
+	&-delete-icon {
+		cursor: pointer;
+
+	}
+	&-added-quest-container {
+		margin-bottom: 15px;
+		width: 65%;
+		.#{$namespace} {
+			&-section-heading {
+				font-size: 14px;
+				color: $primaryColor;
+				font-weight: bold;
+			}
+			&-added-question-wrapper {
+				display: inline-block;
+				width: calc(100% - 200px);
+			}
+			&-question-text {
+				color: $primaryColor;
+				font-size: $primaryTextSize;
+				line-height: 1.4;
+				padding-right: 30px;
+				word-wrap: break-word;
+			}
+			&-section-row {
+				padding: 15px 0;
+				border-bottom: 1px solid $borderColorLight;
+				.#{$namespace} {
+					&-sort-icon {
+						display: inline-block;
+						width: 50px;
+						vertical-align: top;
+						color: $secondaryColor;
+					}
+					&-slide-wrapper {
+						padding-left: 0px;
+						padding-top: 5px;
+					}
+					&-question-actions-container {
+						display: inline-block;
+						width: 150px;
+						vertical-align: top;
+					}
+					&-question-action-icon {
+						display: inline-block;
+						width: 33%;
+						color: $secondaryColor;
+						font-size: 18px;
+					}
+				}
+			}
+			&-quest-edit-wrapper {
+				position: relative;
+				display: inline-block;
+    			width: 33%;
+				.#{$namespace} {
+					&-edit-quest-container {
+						position: absolute;
+						height: auto;
+						width: 500px;
+						right: 0;
+						top: 0;
+						left: unset;
+					}
+				}
+			}
+		}
+	}
+	&-usePrevQuestContainer {
+		padding: 0 15px;
+		.#{$namespace} {
+			&-section-heading {
+				font-size: $primaryTextSize;
+				color: $primaryColor;
+				font-weight: bold;
+				height: 50px;
+				line-height: 50px;
+			}
+			&-section-content {
+				height: calc(100% - 120px);
+				font-size: $primaryTextSize;
+				color: $primaryColor;
+				line-height: 1.2;
+				overflow-y: auto;
+				padding-right: 35px;
+			}
+			&-section-footer {
+				border-top: 1px solid $borderColor;
+				height: 70px;
+				padding: 18px 0;
+				line-height: 34px;
+			}
+			&-quest-added-text {
+				display: inline-block;
+				float: right;
+			}
+			&-section-row {
+				padding-bottom: 10px;
+			}
+		}
+	}
+	&-quest-container {
+		height: auto;
+		.#{$namespace} {
+			&-section-header {
+				background-color: $backgroundColor;
+				padding: 0 15px;
+				line-height: 70px;
+			}
+			&-checkbox-wrapper {
+				display: inline-block;
+				float: right;
+				input + label {
+					padding: 0 0 0 25px;
+				}
+				label {
+					font-size: $secondaryTextSize;
+				}
+			}
+			&-section-content {
+				font-size: $primaryTextSize;
+				color: $primaryColor;
+				line-height: 1.2;
+				padding: 15px;
+				.#{$namespace} {
+					&-text {
+						font-size: $secondaryTextSize;
+						color: $primaryColor;
+						padding-bottom: 10px;
+					}
+					&-textarea {
+						margin-bottom: 15px;
+					}
+				}
+			}
+			&-options-textarea-wrapper {
+				.#{$namespace} {
+					&-cross-button {
+						position: relative;
+						top: -37px;
+						right: -20px;
+						color: $secondaryColor;
+					}
+				}
+			}
+			&-add-quest-option {
+				padding-top: 0;
+				padding-left: 0;
+			}
+			&-section-footer {
+				padding: 0 15px 15px 15px;
+			}
+		}
+	}
+	&-slide-wrapper {
+		padding-left: 37px;
+		.#{$namespace} {
+			&-slide-toggle-button {
+				color: $linkColor;
+				cursor: pointer;
+				font-size: $secondaryTextSize;
+				display: inline-block;
+				&:hover {
+					text-decoration: underline;
+				}
+			}
+			&-options-wrapper {
+				padding-top: 5px;
+				display: none;
+			}
+			&-option-row {
+				display: list-item;
+				margin-left: 18px;
+				font-size: $secondaryTextSize;
+				color: $primaryColor;
+				&:not(:last-child) {
+					padding-bottom: 5px;
+				}
+			}
+		}
+	}
 }

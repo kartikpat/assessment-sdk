@@ -1,0 +1,24 @@
+{
+	"index": {
+		"styles": {
+			"debug" : [
+            	"static/css/index.css"
+			],
+			"prod": [
+				"build/css/sdk-index.min.css"
+			]
+		},
+		"scripts": {
+			"debug": [
+				"static/js/vendor/jquery.min.js",
+				"static/js/utilities/request.js",
+				"static/js/utilities/pubsub.js",
+				"test/static/js/index.js",
+				"static/js/main.js"
+			],
+			"prod" : [
+				"build/js/sdk-index.min.js"
+			]
+		}
+	}
+}

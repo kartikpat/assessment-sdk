@@ -2,13 +2,18 @@
 <html>
 <head>
 	<title>{{title}}</title>
-	<!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet"> -->
+	<link href="https://fonts.googleapis.com/css?family=Droid+Sans:400,700" rel="stylesheet">	
 	{{#styles.length}}
     	{{#styles}}
-    		<link rel="stylesheet" href="/{{.}}">	
+    		<link rel="stylesheet" href="/{{.}}">
     	{{/styles}}
 	{{/styles.length}}
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script type="text/javascript">
+		var baseUrl_local='{{baseUrl_local}}'
+		var baseUrl='{{baseUrl}}'
+		var pluginName = '{{pluginName}}'
+	</script>
 </head>
 <body>
 <div class="header">
